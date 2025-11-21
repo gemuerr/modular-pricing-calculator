@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.10.1
+- Fixed Model B weekday selection: users can now select any of the 5 weekdays, but limited to 4 days total (instead of disabling Friday specifically)
+- When 4 days are selected in Model B, remaining unchecked weekdays are disabled until one is unchecked
+
 ## 0.10.0
 - Added configurable consent checkbox that must be checked before form submission
 - Checkbox label supports HTML (e.g., links to terms and conditions)

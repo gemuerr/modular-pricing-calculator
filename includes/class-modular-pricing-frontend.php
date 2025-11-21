@@ -218,7 +218,7 @@ class Modular_Pricing_Frontend {
                                 <span class="weekday-label">Do</span>
                             </label>
                             <label class="weekday-option">
-                                <input type="checkbox" name="weekdays" value="friday" class="weekday-checkbox" id="weekday-friday" />
+                                <input type="checkbox" name="weekdays" value="friday" class="weekday-checkbox" />
                                 <span class="weekday-label">Fr</span>
                             </label>
                         </div>
@@ -812,7 +812,6 @@ class Modular_Pricing_Frontend {
                 const recapDuration = document.getElementById('recap-duration');
                 const recapDays = document.getElementById('recap-days');
                 const recapPrice = document.getElementById('recap-price');
-                const fridayCheckbox = document.getElementById('weekday-friday');
                 const consentCheckbox = document.getElementById('consent-checkbox');
                 const weeksMultiplier = parseFloat(prices.weeks_multiplier) || 4.33;
                 const roundPrices = prices.round_prices == 1;
@@ -829,32 +828,51 @@ class Modular_Pricing_Frontend {
                     });
                 }
 
-                // Disable Friday checkbox when Model B is selected
-                function updateFridayAvailability() {
+                // Limit Model B to maximum 4 days
+                function updateWeekdayAvailability() {
                     const selectedModel = document.querySelector('input[name="subscription_model"]:checked').value;
-                    if (fridayCheckbox) {
-                        if (selectedModel === 'b') {
-                            fridayCheckbox.disabled = true;
-                            if (fridayCheckbox.checked) {
-                                fridayCheckbox.checked = false;
-                                calculatePrice();
+                    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                    
+                    if (selectedModel === 'b') {
+                        // Model B: limit to 4 days maximum
+                        checkboxes.forEach(function(checkbox) {
+                            if (checkedCount >= 4 && !checkbox.checked) {
+                                checkbox.disabled = true;
+                            } else {
+                                checkbox.disabled = false;
                             }
-                        } else {
-                            fridayCheckbox.disabled = false;
-                        }
+                        });
+                    } else {
+                        // Model A: allow all days
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.disabled = false;
+                        });
                     }
                 }
 
                 // Listen for model changes
                 document.querySelectorAll('input[name="subscription_model"]').forEach(function(radio) {
                     radio.addEventListener('change', function() {
-                        updateFridayAvailability();
+                        updateWeekdayAvailability();
                         calculatePrice();
                     });
                 });
 
-                // Initialize Friday availability
-                updateFridayAvailability();
+                // Listen for weekday checkbox changes
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        // Clear weekday error if present
+                        const errorSpan = document.getElementById('error-weekdays');
+                        if (errorSpan) {
+                            errorSpan.classList.remove('show');
+                        }
+                        updateWeekdayAvailability();
+                        calculatePrice();
+                    });
+                });
+
+                // Initialize weekday availability
+                updateWeekdayAvailability();
 
                 if (isAccordion) {
                     const toggleButton = document.getElementById('toggle-form-btn');
@@ -967,14 +985,6 @@ class Modular_Pricing_Frontend {
                     });
                 });
 
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        const errorSpan = document.getElementById('error-weekdays');
-                        if (errorSpan) {
-                            errorSpan.classList.remove('show');
-                        }
-                    });
-                });
 
                 if (consentCheckbox) {
                     consentCheckbox.addEventListener('change', function() {
@@ -1051,7 +1061,7 @@ class Modular_Pricing_Frontend {
                 }
 
                 radioButtons.forEach(rb => rb.addEventListener('change', calculatePrice));
-                checkboxes.forEach(cb => cb.addEventListener('change', calculatePrice));
+                // Checkbox change listeners are already added in updateWeekdayAvailability initialization
 
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
