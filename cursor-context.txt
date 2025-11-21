@@ -1,0 +1,62 @@
+Modular Pricing Calculator Plugin - Project Context
+Current Status: Version 0.9.2
+I'm working on a WordPress plugin called "Modular Pricing Calculator" for a German dog daycare business (Michel Meute - michelmeute.de). The plugin is a pricing configurator for dog care services.
+Plugin Overview
+Purpose: Allow customers to configure and request quotes for dog daycare services based on subscription model, days per week, and half/full day options.
+Current Version: 0.9.2 (following semantic versioning X.Y.Z)
+Key Features Implemented
+Core Functionality
+
+Variable pricing based on number of days selected (1-5 days/week)
+Two configurable subscription models (names customizable in admin)
+Half-day and full-day options with different pricing
+Weekday selector (Monday-Friday individual selection)
+Monthly price calculation: (price per day × days per week × 4 weeks)
+
+User Interface
+
+German language for all frontend text
+Figtree font family throughout
+Configurable brand colors (primary color and hover color)
+Two display modes: Accordion (collapsible) or Always Open
+Inline field validation with error messages directly under fields
+Phone number field (only accepts numbers, +, spaces, dashes, parentheses)
+Optional notes/comments textarea
+
+Form Fields
+
+Name (required)
+Email (required, validated)
+Phone (optional, format validated)
+Dog name (required)
+Subscription model (radio buttons)
+Care duration (half/full day, radio buttons)
+Weekdays (checkboxes for Mo-Fr)
+Notes (optional textarea)
+
+Backend Features
+
+Admin configuration for all pricing (model A/B, half/full day, 1-5 days)
+Configurable subscription model names
+Optional reCAPTCHA v2 spam protection (checkbox to enable/disable)
+Email notifications (PLAIN TEXT ONLY - no HTML styling)
+View all user configurations in admin table
+Configurable notification email address
+
+Technical Implementation
+
+WordPress shortcode: [pricing_calculator]
+Gutenberg block support (searchable as "Modular Pricing Calculator")
+Database table: wp_pricing_configurations
+Stores: name, email, phone, dog_name, subscription_model, duration, selected_days, monthly_price, notes, created_at
+
+Important Design Decisions
+Styling
+
+Based on Michel Meute website aesthetic (michelmeute.de)
+Soft, friendly colors with rounded corners
+Clean, professional appearance
+Mobile responsive
+
+Email System
+CRITICAL: Email is PLAIN TEXT ONLY. No HTML, no styling, no ASCII art, no decorative characters. Previous attempts at HTML emails failed across multiple clients (Gmail, Fastmail). Current format:
