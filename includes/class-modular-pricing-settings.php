@@ -49,6 +49,7 @@ class Modular_Pricing_Settings {
             'model_b_full_5' => 47,
             'currency' => '€',
             'form_display_mode' => 'accordion',
+            'form_step_mode' => 'combined',
             'notification_email' => get_option('admin_email'),
             'recaptcha_enabled' => 0,
             'recaptcha_site_key' => '',

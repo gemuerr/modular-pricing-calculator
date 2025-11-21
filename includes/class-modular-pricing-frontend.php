@@ -134,6 +134,8 @@ class Modular_Pricing_Frontend {
         $recaptcha_enabled = !empty($settings['recaptcha_enabled']) && !empty($settings['recaptcha_site_key']) && !empty($settings['recaptcha_secret_key']);
         $form_display_mode = isset($settings['form_display_mode']) ? $settings['form_display_mode'] : 'accordion';
         $is_accordion = ($form_display_mode === 'accordion');
+        $form_step_mode = isset($settings['form_step_mode']) ? $settings['form_step_mode'] : 'combined';
+        $is_separate_steps = ($form_step_mode === 'separate');
 
         $primary_color = esc_attr($settings['primary_color']);
         $primary_hover = esc_attr($settings['primary_hover_color']);
@@ -142,7 +144,7 @@ class Modular_Pricing_Frontend {
 
         ob_start();
         ?>
-        <div class="modular-pricing-calculator <?php echo $is_accordion ? 'mode-accordion' : 'mode-always-open'; ?>">
+        <div class="modular-pricing-calculator <?php echo $is_accordion ? 'mode-accordion' : 'mode-always-open'; ?> <?php echo $is_separate_steps ? 'step-mode-separated' : 'step-mode-combined'; ?>">
             <?php if ($is_accordion): ?>
             <button type="button" class="toggle-form-button" id="toggle-form-btn">
                 <span class="toggle-text">Jetzt Betreuung konfigurieren</span>
@@ -156,119 +158,173 @@ class Modular_Pricing_Frontend {
 
             <div class="form-wrapper <?php echo !$is_accordion ? 'open' : ''; ?>" id="form-wrapper">
                 <h3>Deine maßgeschneiderte Betreuung</h3>
-                <form id="pricing-form">
-                <div class="pricing-field">
-                    <label for="customer-name">Dein Name: <span class="required">*</span></label>
-                    <input type="text" id="customer-name" name="customer_name" required />
-                    <span class="field-error" id="error-customer-name"></span>
-                </div>
-
-                <div class="pricing-field">
-                    <label for="customer-email">Deine E-Mail: <span class="required">*</span></label>
-                    <input type="email" id="customer-email" name="customer_email" required />
-                    <span class="field-error" id="error-customer-email"></span>
-                </div>
-
-                <div class="pricing-field">
-                    <label for="customer-phone">Deine Telefonnummer:</label>
-                    <input type="tel" id="customer-phone" name="customer_phone" pattern="[0-9+\s\-()]*" placeholder="+49 123 456789" />
-                    <span class="help-text">Nur Zahlen, +, Leerzeichen, - und Klammern erlaubt</span>
-                    <span class="field-error" id="error-customer-phone"></span>
-                </div>
-
-                <div class="pricing-field">
-                    <label for="dog-name">Name deines Hundes: <span class="required">*</span></label>
-                    <input type="text" id="dog-name" name="dog_name" required />
-                    <span class="field-error" id="error-dog-name"></span>
-                </div>
-
-                <div class="pricing-field">
-                    <label>Abo-Modell:</label>
-                    <div class="radio-selector">
-                        <label class="radio-option">
-                            <input type="radio" name="subscription_model" value="a" class="radio-input" checked />
-                            <span class="radio-label"><?php echo esc_html($settings['model_a_name']); ?></span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="subscription_model" value="b" class="radio-input" />
-                            <span class="radio-label"><?php echo esc_html($settings['model_b_name']); ?></span>
-                        </label>
+                <form id="pricing-form" class="<?php echo $is_separate_steps ? 'two-step-enabled' : 'single-step'; ?>">
+                <div class="form-step step-pricing <?php echo $is_separate_steps ? 'active' : ''; ?>">
+                    <?php if ($is_separate_steps): ?>
+                    <div class="step-heading">
+                        <span class="step-badge">Schritt A</span>
+                        <div class="step-heading-text">
+                            <h4>Preis konfigurieren</h4>
+                            <p>Wähle Modell, Dauer und Tage, um deinen Preis zu berechnen.</p>
+                        </div>
                     </div>
+                    <?php endif; ?>
+
+                    <div class="pricing-field">
+                        <label>Abo-Modell:</label>
+                        <div class="radio-selector">
+                            <label class="radio-option">
+                                <input type="radio" name="subscription_model" value="a" class="radio-input" checked />
+                                <span class="radio-label"><?php echo esc_html($settings['model_a_name']); ?></span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="subscription_model" value="b" class="radio-input" />
+                                <span class="radio-label"><?php echo esc_html($settings['model_b_name']); ?></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pricing-field">
+                        <label>Betreuungsdauer:</label>
+                        <div class="radio-selector">
+                            <label class="radio-option">
+                                <input type="radio" name="day_duration" value="half" class="radio-input" checked />
+                                <span class="radio-label">Halbtags</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="day_duration" value="full" class="radio-input" />
+                                <span class="radio-label">Ganztags</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pricing-field">
+                        <label>Wochentage auswählen:</label>
+                        <div class="weekday-selector" id="weekdays">
+                            <label class="weekday-option">
+                                <input type="checkbox" name="weekdays" value="monday" class="weekday-checkbox" />
+                                <span class="weekday-label">Mo</span>
+                            </label>
+                            <label class="weekday-option">
+                                <input type="checkbox" name="weekdays" value="tuesday" class="weekday-checkbox" />
+                                <span class="weekday-label">Di</span>
+                            </label>
+                            <label class="weekday-option">
+                                <input type="checkbox" name="weekdays" value="wednesday" class="weekday-checkbox" />
+                                <span class="weekday-label">Mi</span>
+                            </label>
+                            <label class="weekday-option">
+                                <input type="checkbox" name="weekdays" value="thursday" class="weekday-checkbox" />
+                                <span class="weekday-label">Do</span>
+                            </label>
+                            <label class="weekday-option">
+                                <input type="checkbox" name="weekdays" value="friday" class="weekday-checkbox" />
+                                <span class="weekday-label">Fr</span>
+                            </label>
+                        </div>
+                        <span class="help-text">Wähle die Tage aus, an denen du die Betreuung nutzen möchtest</span>
+                        <span class="field-error" id="error-weekdays"></span>
+                    </div>
+
+                    <div class="pricing-summary">
+                        <div class="summary-row">
+                            <span>Preis pro Tag:</span>
+                            <span id="price-per-day"><?php echo $settings['currency']; ?>0,00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Anzahl Tage pro Woche:</span>
+                            <span id="days-display">0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Monatlicher Preis (ca. 4 Wochen):</span>
+                            <span id="calculated-price"><?php echo $settings['currency']; ?>0,00</span>
+                        </div>
+                    </div>
+
+                    <?php if ($is_separate_steps): ?>
+                    <div class="step-navigation">
+                        <button type="button" class="step-button primary" id="step-next-btn">Weiter zu Schritt B</button>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
-                <div class="pricing-field">
-                    <label>Betreuungsdauer:</label>
-                    <div class="radio-selector">
-                        <label class="radio-option">
-                            <input type="radio" name="day_duration" value="half" class="radio-input" checked />
-                            <span class="radio-label">Halbtags</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="day_duration" value="full" class="radio-input" />
-                            <span class="radio-label">Ganztags</span>
-                        </label>
+                <div class="form-step step-user <?php echo $is_separate_steps ? '' : 'active'; ?>">
+                    <?php if ($is_separate_steps): ?>
+                    <div class="step-heading">
+                        <span class="step-badge">Schritt B</span>
+                        <div class="step-heading-text">
+                            <h4>Kontaktdaten</h4>
+                            <p>Teile uns mit, wie wir dich erreichen dürfen.</p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="pricing-field">
-                    <label>Wochentage auswählen:</label>
-                    <div class="weekday-selector">
-                        <label class="weekday-option">
-                            <input type="checkbox" name="weekdays" value="monday" class="weekday-checkbox" />
-                            <span class="weekday-label">Mo</span>
-                        </label>
-                        <label class="weekday-option">
-                            <input type="checkbox" name="weekdays" value="tuesday" class="weekday-checkbox" />
-                            <span class="weekday-label">Di</span>
-                        </label>
-                        <label class="weekday-option">
-                            <input type="checkbox" name="weekdays" value="wednesday" class="weekday-checkbox" />
-                            <span class="weekday-label">Mi</span>
-                        </label>
-                        <label class="weekday-option">
-                            <input type="checkbox" name="weekdays" value="thursday" class="weekday-checkbox" />
-                            <span class="weekday-label">Do</span>
-                        </label>
-                        <label class="weekday-option">
-                            <input type="checkbox" name="weekdays" value="friday" class="weekday-checkbox" />
-                            <span class="weekday-label">Fr</span>
-                        </label>
+                    <div class="selection-recap">
+                        <div class="selection-row">
+                            <span>Modell</span>
+                            <strong id="recap-model">-</strong>
+                        </div>
+                        <div class="selection-row">
+                            <span>Betreuungsdauer</span>
+                            <strong id="recap-duration">-</strong>
+                        </div>
+                        <div class="selection-row">
+                            <span>Gewählte Tage</span>
+                            <strong id="recap-days">Noch keine Auswahl</strong>
+                        </div>
+                        <div class="selection-row">
+                            <span>Monatlicher Preis</span>
+                            <strong id="recap-price"><?php echo $settings['currency']; ?>0,00</strong>
+                        </div>
                     </div>
-                    <span class="help-text">Wähle die Tage aus, an denen du die Betreuung nutzen möchtest</span>
-                    <span class="field-error" id="error-weekdays"></span>
-                </div>
+                    <?php endif; ?>
 
-                <div class="pricing-field">
-                    <label for="notes">Anmerkungen:</label>
-                    <textarea id="notes" name="notes" rows="4" placeholder="Hier kannst du uns zusätzliche Informationen mitteilen..."></textarea>
-                </div>
+                    <div class="pricing-field">
+                        <label for="customer-name">Dein Name: <span class="required">*</span></label>
+                        <input type="text" id="customer-name" name="customer_name" required />
+                        <span class="field-error" id="error-customer-name"></span>
+                    </div>
 
-                <div class="pricing-summary">
-                    <div class="summary-row">
-                        <span>Preis pro Tag:</span>
-                        <span id="price-per-day"><?php echo $settings['currency']; ?>0,00</span>
+                    <div class="pricing-field">
+                        <label for="customer-email">Deine E-Mail: <span class="required">*</span></label>
+                        <input type="email" id="customer-email" name="customer_email" required />
+                        <span class="field-error" id="error-customer-email"></span>
                     </div>
-                    <div class="summary-row">
-                        <span>Anzahl Tage pro Woche:</span>
-                        <span id="days-display">0</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Monatlicher Preis (ca. 4 Wochen):</span>
-                        <span id="calculated-price"><?php echo $settings['currency']; ?>0,00</span>
-                    </div>
-                </div>
 
-                <?php if ($recaptcha_enabled): ?>
-                <div class="pricing-field">
-                    <div class="recaptcha-wrapper">
-                        <div class="g-recaptcha" data-sitekey="<?php echo esc_attr($settings['recaptcha_site_key']); ?>"></div>
+                    <div class="pricing-field">
+                        <label for="customer-phone">Deine Telefonnummer:</label>
+                        <input type="tel" id="customer-phone" name="customer_phone" pattern="[0-9+\s\-()]*" placeholder="+49 123 456789" />
+                        <span class="help-text">Nur Zahlen, +, Leerzeichen, - und Klammern erlaubt</span>
+                        <span class="field-error" id="error-customer-phone"></span>
                     </div>
-                    <span class="field-error" id="error-recaptcha"></span>
-                </div>
-                <?php endif; ?>
 
-                <button type="submit" class="submit-button">Unverbindlich anfragen</button>
-                <div id="form-message"></div>
+                    <div class="pricing-field">
+                        <label for="dog-name">Name deines Hundes: <span class="required">*</span></label>
+                        <input type="text" id="dog-name" name="dog_name" required />
+                        <span class="field-error" id="error-dog-name"></span>
+                    </div>
+
+                    <div class="pricing-field">
+                        <label for="notes">Anmerkungen:</label>
+                        <textarea id="notes" name="notes" rows="4" placeholder="Hier kannst du uns zusätzliche Informationen mitteilen..."></textarea>
+                    </div>
+
+                    <?php if ($recaptcha_enabled): ?>
+                    <div class="pricing-field">
+                        <div class="recaptcha-wrapper">
+                            <div class="g-recaptcha" data-sitekey="<?php echo esc_attr($settings['recaptcha_site_key']); ?>"></div>
+                        </div>
+                        <span class="field-error" id="error-recaptcha"></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="step-navigation <?php echo $is_separate_steps ? 'has-secondary' : ''; ?>">
+                        <?php if ($is_separate_steps): ?>
+                        <button type="button" class="step-button ghost" id="step-prev-btn">Zurück zu Schritt A</button>
+                        <?php endif; ?>
+                        <button type="submit" class="submit-button">Unverbindlich anfragen</button>
+                    </div>
+                    <div id="form-message"></div>
+                </div>
             </form>
             </div>
         </div>
@@ -359,6 +415,45 @@ class Modular_Pricing_Frontend {
                 font-size: 28px;
                 font-weight: 600;
                 letter-spacing: -0.5px;
+            }
+            form.two-step-enabled .form-step {
+                display: none;
+            }
+            form.two-step-enabled .form-step.active {
+                display: block;
+            }
+            .form-step + .form-step {
+                margin-top: 30px;
+            }
+            .step-heading {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 24px;
+            }
+            .step-heading-text h4 {
+                margin: 0;
+                font-size: 22px;
+                color: #2c3e50;
+            }
+            .step-heading-text p {
+                margin: 4px 0 0;
+                font-size: 14px;
+                color: #7f8c9a;
+            }
+            .step-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 80px;
+                padding: 9px 16px;
+                border-radius: 999px;
+                background: rgba(<?php echo $primary_rgb; ?>, 0.15);
+                color: <?php echo $primary_color; ?>;
+                font-weight: 600;
+                font-size: 13px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
             }
             .pricing-field {
                 margin-bottom: 24px;
@@ -477,6 +572,29 @@ class Modular_Pricing_Frontend {
                 border-radius: 16px;
                 border: 2px solid #e8eef3;
             }
+            .selection-recap {
+                border: 2px solid #e8eef3;
+                border-radius: 16px;
+                padding: 24px;
+                background: #f8fafb;
+                margin-bottom: 30px;
+            }
+            .selection-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                font-size: 14px;
+                color: #2c3e50;
+                padding: 8px 0;
+            }
+            .selection-row + .selection-row {
+                border-top: 1px solid #e8eef3;
+            }
+            .selection-row strong {
+                font-size: 15px;
+                color: #2c3e50;
+            }
             .summary-row {
                 display: flex;
                 justify-content: space-between;
@@ -528,6 +646,55 @@ class Modular_Pricing_Frontend {
                 transform: none;
                 box-shadow: none;
             }
+            .step-navigation {
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+            form.single-step .step-navigation {
+                display: block;
+                margin-top: 30px;
+            }
+            form.single-step .step-navigation .submit-button {
+                width: 100%;
+            }
+            .step-navigation.has-secondary {
+                justify-content: space-between;
+                align-items: center;
+            }
+            .step-button {
+                border: none;
+                border-radius: 12px;
+                padding: 14px 24px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .step-button.primary {
+                background: <?php echo $primary_color; ?>;
+                color: #ffffff;
+                box-shadow: 0 4px 12px rgba(<?php echo $primary_rgb; ?>, 0.3);
+            }
+            .step-button.primary:hover {
+                background: <?php echo $primary_hover; ?>;
+            }
+            .step-button.ghost {
+                background: transparent;
+                color: <?php echo $primary_color; ?>;
+                border: 2px solid rgba(<?php echo $primary_rgb; ?>, 0.4);
+            }
+            .step-button.ghost:hover {
+                color: <?php echo $primary_hover; ?>;
+                border-color: <?php echo $primary_hover; ?>;
+            }
+            form.two-step-enabled .step-navigation .submit-button {
+                width: auto;
+                min-width: 220px;
+                flex: 1;
+            }
             #form-message {
                 margin-top: 20px;
                 padding: 16px 20px;
@@ -567,6 +734,15 @@ class Modular_Pricing_Frontend {
                 .weekday-option {
                     min-width: 50px;
                 }
+                form.two-step-enabled .step-navigation {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                form.two-step-enabled .step-navigation .submit-button,
+                form.two-step-enabled .step-navigation .step-button {
+                    width: 100%;
+                    min-width: 0;
+                }
             }
         </style>
 
@@ -574,6 +750,7 @@ class Modular_Pricing_Frontend {
             (function() {
                 const prices = <?php echo wp_json_encode($settings); ?>;
                 const form = document.getElementById('pricing-form');
+                const formWrapper = document.getElementById('form-wrapper');
                 const priceDisplay = document.getElementById('calculated-price');
                 const pricePerDayDisplay = document.getElementById('price-per-day');
                 const daysDisplay = document.getElementById('days-display');
@@ -583,10 +760,19 @@ class Modular_Pricing_Frontend {
                 const formMessage = document.getElementById('form-message');
                 const recaptchaEnabled = <?php echo $recaptcha_enabled ? 'true' : 'false'; ?>;
                 const isAccordion = <?php echo $is_accordion ? 'true' : 'false'; ?>;
+                const stepMode = '<?php echo esc_js($form_step_mode); ?>';
+                const isTwoStep = stepMode === 'separate';
+                const pricingStep = document.querySelector('.form-step.step-pricing');
+                const userStep = document.querySelector('.form-step.step-user');
+                const nextStepBtn = document.getElementById('step-next-btn');
+                const prevStepBtn = document.getElementById('step-prev-btn');
+                const recapModel = document.getElementById('recap-model');
+                const recapDuration = document.getElementById('recap-duration');
+                const recapDays = document.getElementById('recap-days');
+                const recapPrice = document.getElementById('recap-price');
 
                 if (isAccordion) {
                     const toggleButton = document.getElementById('toggle-form-btn');
-                    const formWrapper = document.getElementById('form-wrapper');
                     let recaptchaLoaded = false;
 
                     toggleButton.addEventListener('click', function() {
@@ -611,6 +797,39 @@ class Modular_Pricing_Frontend {
                             }
                         }
                     });
+                }
+
+                if (isTwoStep && pricingStep && userStep) {
+                    const focusFormTop = function() {
+                        if (formWrapper) {
+                            formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    };
+
+                    const showStep = function(step) {
+                        if (step === 'pricing') {
+                            pricingStep.classList.add('active');
+                            userStep.classList.remove('active');
+                        } else {
+                            pricingStep.classList.remove('active');
+                            userStep.classList.add('active');
+                        }
+                        focusFormTop();
+                    };
+
+                    if (nextStepBtn) {
+                        nextStepBtn.addEventListener('click', function() {
+                            if (validateStepA()) {
+                                showStep('user');
+                            }
+                        });
+                    }
+
+                    if (prevStepBtn) {
+                        prevStepBtn.addEventListener('click', function() {
+                            showStep('pricing');
+                        });
+                    }
                 }
 
                 const weekdayNames = {
@@ -672,16 +891,49 @@ class Modular_Pricing_Frontend {
                     });
                 });
 
+                function validateStepA() {
+                    const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
+                    if (checkedDays.length === 0) {
+                        showError('weekdays', 'Bitte wähle mindestens einen Wochentag aus.');
+                        if (isTwoStep && pricingStep && userStep) {
+                            pricingStep.classList.add('active');
+                            userStep.classList.remove('active');
+                            if (formWrapper) {
+                                formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+
                 function calculatePrice() {
                     const model = document.querySelector('input[name="subscription_model"]:checked').value;
                     const duration = document.querySelector('input[name="day_duration"]:checked').value;
                     const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
                     const numDays = checkedDays.length;
+                    const modelName = model === 'a' ? prices.model_a_name : prices.model_b_name;
+                    const durationLabel = duration === 'half' ? 'Halbtags' : 'Ganztags';
+                    const weekdayLabels = checkedDays.map(cb => weekdayNames[cb.value]);
+
+                    if (recapModel) {
+                        recapModel.textContent = modelName;
+                    }
+                    if (recapDuration) {
+                        recapDuration.textContent = durationLabel;
+                    }
+                    if (recapDays) {
+                        recapDays.textContent = weekdayLabels.length ? weekdayLabels.join(', ') : 'Noch keine Auswahl';
+                    }
 
                     if (numDays === 0) {
-                        pricePerDayDisplay.textContent = prices.currency + '0,00';
+                        const zeroText = prices.currency + '0,00';
+                        pricePerDayDisplay.textContent = zeroText;
                         daysDisplay.textContent = '0';
-                        priceDisplay.textContent = prices.currency + '0,00';
+                        priceDisplay.textContent = zeroText;
+                        if (recapPrice) {
+                            recapPrice.textContent = zeroText;
+                        }
                         return;
                     }
 
@@ -689,9 +941,15 @@ class Modular_Pricing_Frontend {
                     const pricePerDay = parseFloat(prices[key]) || 0;
                     const monthlyPrice = pricePerDay * numDays * 4;
 
-                    pricePerDayDisplay.textContent = prices.currency + pricePerDay.toFixed(2).replace('.', ',');
+                    const pricePerDayText = prices.currency + pricePerDay.toFixed(2).replace('.', ',');
+                    const monthlyPriceText = prices.currency + monthlyPrice.toFixed(2).replace('.', ',');
+
+                    pricePerDayDisplay.textContent = pricePerDayText;
                     daysDisplay.textContent = numDays;
-                    priceDisplay.textContent = prices.currency + monthlyPrice.toFixed(2).replace('.', ',');
+                    priceDisplay.textContent = monthlyPriceText;
+                    if (recapPrice) {
+                        recapPrice.textContent = monthlyPriceText;
+                    }
                 }
 
                 radioButtons.forEach(rb => rb.addEventListener('change', calculatePrice));

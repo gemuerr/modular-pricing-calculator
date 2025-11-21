@@ -5,6 +5,7 @@ WordPress plugin that lets dog daycare businesses provide an interactive calcula
 ## Features
 - Configurable pricing tables for two subscription models (half/full day, 1‑5 days per week)
 - Inline-validated frontend form with accordion or always-open layout
+- Optional two-step flow that separates price selection (Step A) from contact capture (Step B)
 - Optional reCAPTCHA v2 spam protection
 - Saves submissions to `wp_pricing_configurations` and sends plain-text notification email
 - Gutenberg block and shortcode support for easy embedding

@@ -3,9 +3,9 @@
  * Plugin Name: Modular Pricing Calculator
  * Plugin URI: https://example.com
  * Description: Configure modular pricing based on subscription model, day duration, and number of days with accordion toggle, variable pricing, and reCAPTCHA protection
- * Version: 0.9.2
+ * Version: 0.9.3
  * Author: Johannes Gemürr and Claude. Mainly Claude.
- * Author URI: https://example.com
+ * Author URI: https://www.hinterlandforefront.de
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: modular-pricing-calculator
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('MODULAR_PRICING_PLUGIN_VERSION')) {
-    define('MODULAR_PRICING_PLUGIN_VERSION', '0.9.2');
+    define('MODULAR_PRICING_PLUGIN_VERSION', '0.9.3');
 }
 
 if (!defined('MODULAR_PRICING_PLUGIN_DIR')) {

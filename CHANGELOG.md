@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.9.3
+- Added backend option to split the calculator into Step A (pricing) and Step B (user data).
+- Updated frontend markup, styles, and scripts to support the new two-step experience with summaries.
+
 ## 0.9.2
 - Simplified outbound emails to plain text only for universal compatibility.
 

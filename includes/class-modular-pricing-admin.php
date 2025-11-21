@@ -203,6 +203,23 @@ class Modular_Pricing_Admin {
                         </td>
                     </tr>
                     <tr>
+                        <th scope="row">Form Step Mode</th>
+                        <td>
+                            <label>
+                                <input type="radio" name="<?php echo $this->option_name; ?>[form_step_mode]"
+                                       value="combined" <?php checked($settings['form_step_mode'], 'combined'); ?> />
+                                Single step (inputs and user data together)
+                            </label>
+                            <br><br>
+                            <label>
+                                <input type="radio" name="<?php echo $this->option_name; ?>[form_step_mode]"
+                                       value="separate" <?php checked($settings['form_step_mode'], 'separate'); ?> />
+                                Two steps (Step A pricing ➝ Step B contact data)
+                            </label>
+                            <p class="description">Separate the calculator into Step A (plan selection) and Step B (contact form)</p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th colspan="2"><h2>Email Notification</h2></th>
                     </tr>
                     <tr>
