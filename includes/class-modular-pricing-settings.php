@@ -55,7 +55,11 @@ class Modular_Pricing_Settings {
             'recaptcha_site_key' => '',
             'recaptcha_secret_key' => '',
             'primary_color' => '#4a90e2',
-            'primary_hover_color' => '#357abd'
+            'primary_hover_color' => '#357abd',
+            'round_prices' => 0,
+            'weeks_multiplier' => '4.33',
+            'require_consent_checkbox' => 0,
+            'consent_checkbox_label' => 'Ich stimme den <a href="#">AGB</a> zu.'
         );
     }
 }

@@ -220,6 +220,58 @@ class Modular_Pricing_Admin {
                         </td>
                     </tr>
                     <tr>
+                        <th colspan="2"><h2>Pricing Calculation</h2></th>
+                    </tr>
+                    <tr>
+                        <th scope="row">Weeks Multiplier</th>
+                        <td>
+                            <label>
+                                <input type="radio" name="<?php echo $this->option_name; ?>[weeks_multiplier]"
+                                       value="4" <?php checked($settings['weeks_multiplier'], '4'); ?> />
+                                4 weeks
+                            </label>
+                            <br><br>
+                            <label>
+                                <input type="radio" name="<?php echo $this->option_name; ?>[weeks_multiplier]"
+                                       value="4.33" <?php checked($settings['weeks_multiplier'], '4.33'); ?> />
+                                4.33 weeks (more accurate monthly calculation)
+                            </label>
+                            <p class="description">Choose the multiplier for calculating monthly prices. 4.33 is more accurate (52 weeks ÷ 12 months).</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Round Prices Up</th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="<?php echo $this->option_name; ?>[round_prices]"
+                                       value="1" <?php checked($settings['round_prices'], 1); ?> />
+                                Round monthly prices up to the nearest whole number
+                            </label>
+                            <p class="description">When enabled, monthly prices will be rounded up (e.g., €123.45 becomes €124.00).</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2"><h2>Consent Checkbox</h2></th>
+                    </tr>
+                    <tr>
+                        <th scope="row">Require Consent Checkbox</th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="<?php echo $this->option_name; ?>[require_consent_checkbox]"
+                                       value="1" <?php checked($settings['require_consent_checkbox'], 1); ?> />
+                                Require users to check a consent checkbox before submitting the form
+                            </label>
+                            <p class="description">When enabled, users must check a consent checkbox before the submit button becomes active.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Checkbox Label</th>
+                        <td>
+                            <textarea name="<?php echo $this->option_name; ?>[consent_checkbox_label]" rows="3" style="width: 100%; max-width: 600px;"><?php echo esc_textarea($settings['consent_checkbox_label']); ?></textarea>
+                            <p class="description">Label text for the consent checkbox. HTML is allowed (e.g., links to terms and conditions).</p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th colspan="2"><h2>Email Notification</h2></th>
                     </tr>
                     <tr>
@@ -434,7 +486,7 @@ class Modular_Pricing_Admin {
                 <code>[pricing_calculator]</code>
 
                 <h4>Variable Pricing</h4>
-                <p>The pricing is variable based on the number of days selected. Configure different prices per day for 1-5 days per week. The final monthly price is calculated as: (price per day × number of days per week × 4.33 weeks).</p>
+                <p>The pricing is variable based on the number of days selected. Configure different prices per day for 1-5 days per week (Model B is limited to 4 days maximum). The final monthly price is calculated as: (price per day × number of days per week × weeks multiplier). You can configure the weeks multiplier (4 or 4.33) and enable price rounding in the Pricing Calculation section above.</p>
 
                 <h4>Setting up reCAPTCHA v2</h4>
                 <ol>

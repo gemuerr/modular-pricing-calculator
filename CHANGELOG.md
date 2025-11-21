@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.10.0
+- Added configurable consent checkbox that must be checked before form submission
+- Checkbox label supports HTML (e.g., links to terms and conditions)
+- Submit button is disabled until consent checkbox is checked (when enabled)
+- Added validation to ensure consent checkbox is checked before submission
+
+## 0.9.9
+- Added backend option to round prices up to nearest whole number
+- Added backend option to switch between 4 and 4.33 weeks multiplier for monthly calculation
+- Model B now restricts selection to maximum 4 days (Friday checkbox is disabled when Model B is selected)
+- Updated pricing calculation to use configurable multiplier and rounding settings
+
 ## 0.9.8
 - Modernized admin configuration page UI with improved styling, spacing, and visual hierarchy
 - Enhanced form inputs with better focus states and borders

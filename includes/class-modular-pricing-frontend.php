@@ -218,7 +218,7 @@ class Modular_Pricing_Frontend {
                                 <span class="weekday-label">Do</span>
                             </label>
                             <label class="weekday-option">
-                                <input type="checkbox" name="weekdays" value="friday" class="weekday-checkbox" />
+                                <input type="checkbox" name="weekdays" value="friday" class="weekday-checkbox" id="weekday-friday" />
                                 <span class="weekday-label">Fr</span>
                             </label>
                         </div>
@@ -236,7 +236,7 @@ class Modular_Pricing_Frontend {
                             <span id="days-display">0</span>
                         </div>
                         <div class="summary-row">
-                            <span>Monatlicher Preis (ca. 4,33 Wochen):</span>
+                            <span>Monatlicher Preis (ca. <?php echo esc_html($settings['weeks_multiplier'] ?? '4.33'); ?> Wochen):</span>
                             <span id="calculated-price"><?php echo $settings['currency']; ?>0,00</span>
                         </div>
                     </div>
@@ -314,6 +314,16 @@ class Modular_Pricing_Frontend {
                             <div class="g-recaptcha" data-sitekey="<?php echo esc_attr($settings['recaptcha_site_key']); ?>"></div>
                         </div>
                         <span class="field-error" id="error-recaptcha"></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($settings['require_consent_checkbox'])): ?>
+                    <div class="pricing-field">
+                        <label class="consent-checkbox-label">
+                            <input type="checkbox" id="consent-checkbox" name="consent_checkbox" required />
+                            <span class="consent-checkbox-text"><?php echo wp_kses_post($settings['consent_checkbox_label']); ?></span>
+                        </label>
+                        <span class="field-error" id="error-consent-checkbox"></span>
                     </div>
                     <?php endif; ?>
 
@@ -526,6 +536,10 @@ class Modular_Pricing_Frontend {
             .weekday-option {
                 min-width: 60px;
             }
+            .weekday-option input[type="checkbox"]:disabled + .weekday-label {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
             .radio-option input[type="radio"],
             .weekday-option input[type="checkbox"] {
                 display: none;
@@ -645,6 +659,34 @@ class Modular_Pricing_Frontend {
                 cursor: not-allowed;
                 transform: none;
                 box-shadow: none;
+            }
+            .consent-checkbox-label {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                cursor: pointer;
+                margin-bottom: 0;
+            }
+            .consent-checkbox-label input[type="checkbox"] {
+                margin: 0;
+                margin-top: 3px;
+                flex-shrink: 0;
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+            }
+            .consent-checkbox-text {
+                flex: 1;
+                font-size: 14px;
+                line-height: 1.5;
+                color: #2c3e50;
+            }
+            .consent-checkbox-text a {
+                color: <?php echo $primary_color; ?>;
+                text-decoration: underline;
+            }
+            .consent-checkbox-text a:hover {
+                color: <?php echo $primary_hover; ?>;
             }
             .step-navigation {
                 display: flex;
@@ -770,6 +812,49 @@ class Modular_Pricing_Frontend {
                 const recapDuration = document.getElementById('recap-duration');
                 const recapDays = document.getElementById('recap-days');
                 const recapPrice = document.getElementById('recap-price');
+                const fridayCheckbox = document.getElementById('weekday-friday');
+                const consentCheckbox = document.getElementById('consent-checkbox');
+                const weeksMultiplier = parseFloat(prices.weeks_multiplier) || 4.33;
+                const roundPrices = prices.round_prices == 1;
+                const requireConsent = prices.require_consent_checkbox == 1;
+
+                // Handle consent checkbox and submit button state
+                if (consentCheckbox && requireConsent) {
+                    // Initially disable submit button if consent is required
+                    submitButton.disabled = !consentCheckbox.checked;
+
+                    // Update submit button state when checkbox changes
+                    consentCheckbox.addEventListener('change', function() {
+                        submitButton.disabled = !this.checked;
+                    });
+                }
+
+                // Disable Friday checkbox when Model B is selected
+                function updateFridayAvailability() {
+                    const selectedModel = document.querySelector('input[name="subscription_model"]:checked').value;
+                    if (fridayCheckbox) {
+                        if (selectedModel === 'b') {
+                            fridayCheckbox.disabled = true;
+                            if (fridayCheckbox.checked) {
+                                fridayCheckbox.checked = false;
+                                calculatePrice();
+                            }
+                        } else {
+                            fridayCheckbox.disabled = false;
+                        }
+                    }
+                }
+
+                // Listen for model changes
+                document.querySelectorAll('input[name="subscription_model"]').forEach(function(radio) {
+                    radio.addEventListener('change', function() {
+                        updateFridayAvailability();
+                        calculatePrice();
+                    });
+                });
+
+                // Initialize Friday availability
+                updateFridayAvailability();
 
                 if (isAccordion) {
                     const toggleButton = document.getElementById('toggle-form-btn');
@@ -891,6 +976,15 @@ class Modular_Pricing_Frontend {
                     });
                 });
 
+                if (consentCheckbox) {
+                    consentCheckbox.addEventListener('change', function() {
+                        const errorSpan = document.getElementById('error-consent-checkbox');
+                        if (errorSpan) {
+                            errorSpan.classList.remove('show');
+                        }
+                    });
+                }
+
                 function validateStepA() {
                     const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
                     if (checkedDays.length === 0) {
@@ -939,7 +1033,11 @@ class Modular_Pricing_Frontend {
 
                     const key = 'model_' + model + '_' + duration + '_' + numDays;
                     const pricePerDay = parseFloat(prices[key]) || 0;
-                    const monthlyPrice = pricePerDay * numDays * 4.33;
+                    let monthlyPrice = pricePerDay * numDays * weeksMultiplier;
+                    
+                    if (roundPrices) {
+                        monthlyPrice = Math.ceil(monthlyPrice);
+                    }
 
                     const pricePerDayText = prices.currency + pricePerDay.toFixed(2).replace('.', ',');
                     const monthlyPriceText = prices.currency + monthlyPrice.toFixed(2).replace('.', ',');
@@ -1007,6 +1105,11 @@ class Modular_Pricing_Frontend {
                         }
                     }
 
+                    if (requireConsent && consentCheckbox && !consentCheckbox.checked) {
+                        showError('consent-checkbox', 'Bitte bestätige die Einverständniserklärung.');
+                        hasErrors = true;
+                    }
+
                     if (hasErrors) {
                         return;
                     }
@@ -1016,7 +1119,11 @@ class Modular_Pricing_Frontend {
                     const numDays = checkedDays.length;
                     const key = 'model_' + model + '_' + duration + '_' + numDays;
                     const pricePerDay = parseFloat(prices[key]) || 0;
-                    const monthlyPrice = pricePerDay * numDays * 4.33;
+                    let monthlyPrice = pricePerDay * numDays * weeksMultiplier;
+                    
+                    if (roundPrices) {
+                        monthlyPrice = Math.ceil(monthlyPrice);
+                    }
 
                     const modelName = model === 'a' ? prices.model_a_name : prices.model_b_name;
 
