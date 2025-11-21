@@ -28,8 +28,14 @@ Add the calculator into any post or page:
 Insert the block **Modular Pricing Calculator** from the Widgets category to render the same form.
 
 ### Admin Pages
-- `Modular Pricing → Modular Pricing`: plugin settings (pricing, colors, display mode, notification email, reCAPTCHA keys).
+- `Modular Pricing → Modular Pricing`: plugin settings (pricing, colors, display mode, step mode, notification email, reCAPTCHA keys).
 - `Modular Pricing → User Configurations`: latest submissions stored in the custom table.
+
+### Configurable Step Flow
+- In **Modular Pricing → Modular Pricing** you can choose between `Single step` (legacy combined form) and `Two steps`, which breaks the experience into:
+  - **Step A**: Pricing choices (model, duration, weekdays) and live monthly calculation.
+  - **Step B**: Contact, dog info, and notes, plus a recap of the selections from Step A.
+- Switching modes requires no shortcode changes—the front-end updates automatically.
 
 ## Email Notifications
 Each valid submission sends a plain-text email containing contact details, care preferences, selected weekdays, monthly price, notes, and timestamp to the configured notification address.
