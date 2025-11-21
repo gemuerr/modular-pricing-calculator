@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.13.0
+- Added "Nur kontaktanfrage senden" link in Step 1 to skip pricing configuration and go directly to contact form
+- Made weekday selection optional when skipping to contact form
+- Default values are used for pricing fields when skipped (shows "Keine Auswahl" in recap)
+
 ## 0.12.0
 - Added sortable columns to Submitted Forms table (click column headers to sort)
 - Refactored table to group submissions by customer email

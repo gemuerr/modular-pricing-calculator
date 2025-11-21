@@ -244,6 +244,7 @@ class Modular_Pricing_Frontend {
                     <?php if ($is_separate_steps): ?>
                     <div class="step-navigation">
                         <button type="button" class="step-button primary" id="step-next-btn">Weiter</button>
+                        <a href="#" class="skip-to-contact-link" id="skip-to-contact-btn">Nur kontaktanfrage senden</a>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -706,6 +707,13 @@ class Modular_Pricing_Frontend {
                 justify-content: space-between;
                 align-items: center;
             }
+            form.two-step-enabled .step-pricing .step-navigation {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            form.two-step-enabled .step-pricing .step-navigation .step-button {
+                width: 100%;
+            }
             .step-button {
                 border: none;
                 border-radius: 12px;
@@ -736,6 +744,20 @@ class Modular_Pricing_Frontend {
                 width: auto;
                 min-width: 220px;
                 flex: 1;
+            }
+            .skip-to-contact-link {
+                display: inline-block;
+                margin-top: 12px;
+                color: <?php echo $primary_color; ?>;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                cursor: pointer;
+            }
+            .skip-to-contact-link:hover {
+                color: <?php echo $primary_hover; ?>;
+                text-decoration: underline;
             }
             #form-message {
                 margin-top: 20px;
@@ -808,6 +830,7 @@ class Modular_Pricing_Frontend {
                 const userStep = document.querySelector('.form-step.step-user');
                 const nextStepBtn = document.getElementById('step-next-btn');
                 const prevStepBtn = document.getElementById('step-prev-btn');
+                const skipToContactBtn = document.getElementById('skip-to-contact-btn');
                 const recapModel = document.getElementById('recap-model');
                 const recapDuration = document.getElementById('recap-duration');
                 const recapDays = document.getElementById('recap-days');
@@ -931,6 +954,30 @@ class Modular_Pricing_Frontend {
                     if (prevStepBtn) {
                         prevStepBtn.addEventListener('click', function() {
                             showStep('pricing');
+                        });
+                    }
+
+                    if (skipToContactBtn) {
+                        skipToContactBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            // Set default values if nothing is selected
+                            const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
+                            if (checkedDays.length === 0) {
+                                // Set default values for recap display
+                                if (recapModel) {
+                                    recapModel.textContent = '-';
+                                }
+                                if (recapDuration) {
+                                    recapDuration.textContent = '-';
+                                }
+                                if (recapDays) {
+                                    recapDays.textContent = 'Keine Auswahl';
+                                }
+                                if (recapPrice) {
+                                    recapPrice.textContent = prices.currency + '0,00';
+                                }
+                            }
+                            showStep('user');
                         });
                     }
                 }
@@ -1102,7 +1149,10 @@ class Modular_Pricing_Frontend {
                         .filter(cb => cb.checked)
                         .map(cb => weekdayNames[cb.value]);
 
-                    if (checkedDays.length === 0) {
+                    // Only validate weekdays if we're in single-step mode or if we came from step 1 normally
+                    // If user skipped to step 2, weekdays are optional
+                    const isSkipped = checkedDays.length === 0 && isTwoStep;
+                    if (checkedDays.length === 0 && !isSkipped) {
                         showError('weekdays', 'Bitte wähle mindestens einen Wochentag aus.');
                         hasErrors = true;
                     }
@@ -1124,18 +1174,30 @@ class Modular_Pricing_Frontend {
                         return;
                     }
 
-                    const model = document.querySelector('input[name="subscription_model"]:checked').value;
-                    const duration = document.querySelector('input[name="day_duration"]:checked').value;
-                    const numDays = checkedDays.length;
-                    const key = 'model_' + model + '_' + duration + '_' + numDays;
-                    const pricePerDay = parseFloat(prices[key]) || 0;
-                    let monthlyPrice = pricePerDay * numDays * weeksMultiplier;
-                    
-                    if (roundPrices) {
-                        monthlyPrice = Math.ceil(monthlyPrice);
-                    }
+                    // Handle skipped pricing step
+                    let model, duration, numDays, modelName, monthlyPrice, pricePerDay;
+                    if (checkedDays.length === 0 && isTwoStep) {
+                        // User skipped pricing step - use default/empty values
+                        model = 'a';
+                        duration = 'half';
+                        numDays = 0;
+                        modelName = 'Nicht ausgewählt';
+                        pricePerDay = 0;
+                        monthlyPrice = 0;
+                    } else {
+                        model = document.querySelector('input[name="subscription_model"]:checked').value;
+                        duration = document.querySelector('input[name="day_duration"]:checked').value;
+                        numDays = checkedDays.length;
+                        const key = 'model_' + model + '_' + duration + '_' + numDays;
+                        pricePerDay = parseFloat(prices[key]) || 0;
+                        monthlyPrice = pricePerDay * numDays * weeksMultiplier;
+                        
+                        if (roundPrices) {
+                            monthlyPrice = Math.ceil(monthlyPrice);
+                        }
 
-                    const modelName = model === 'a' ? prices.model_a_name : prices.model_b_name;
+                        modelName = model === 'a' ? prices.model_a_name : prices.model_b_name;
+                    }
 
                     const formData = new FormData();
                     formData.append('action', 'save_pricing_configuration');
@@ -1145,7 +1207,7 @@ class Modular_Pricing_Frontend {
                     formData.append('dog_name', document.getElementById('dog-name').value);
                     formData.append('subscription_model', modelName);
                     formData.append('duration', duration);
-                    formData.append('selected_days', checkedDays.join(', '));
+                    formData.append('selected_days', checkedDays.length > 0 ? checkedDays.join(', ') : 'Keine Auswahl');
                     formData.append('monthly_price', prices.currency + monthlyPrice.toFixed(2).replace('.', ','));
                     formData.append('notes', document.getElementById('notes').value);
 
