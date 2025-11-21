@@ -131,12 +131,38 @@ class Modular_Pricing_Ajax {
 
         $message_plain = implode("\n", $message_lines);
 
+        $admin_email = get_option('admin_email');
+        $site_name = get_bloginfo('name');
+        
         $headers = array(
             'Content-Type: text/plain; charset=UTF-8',
-            'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>'
+            'From: ' . $site_name . ' <' . $admin_email . '>'
         );
 
-        wp_mail($notification_email, $subject, $message_plain, $headers);
+        // Try to send the email and log any errors
+        $mail_result = wp_mail($notification_email, $subject, $message_plain, $headers);
+        
+        // Log email sending attempt for debugging (only if WP_DEBUG is enabled)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            if (!$mail_result) {
+                error_log('Modular Pricing Calculator: Failed to send email to ' . $notification_email);
+                // Check if there's a global $phpmailer error
+                global $phpmailer;
+                if (isset($phpmailer) && is_object($phpmailer) && !empty($phpmailer->ErrorInfo)) {
+                    error_log('Modular Pricing Calculator: PHPMailer error: ' . $phpmailer->ErrorInfo);
+                }
+            } else {
+                error_log('Modular Pricing Calculator: Email sent successfully to ' . $notification_email);
+            }
+        }
+        
+        // Store email send status in a transient for admin debugging (last 24 hours)
+        set_transient('modular_pricing_last_email_status', array(
+            'success' => $mail_result,
+            'to' => $notification_email,
+            'timestamp' => current_time('mysql'),
+            'error' => (!$mail_result && isset($phpmailer) && is_object($phpmailer) && !empty($phpmailer->ErrorInfo)) ? $phpmailer->ErrorInfo : null
+        ), DAY_IN_SECONDS);
     }
 }
 

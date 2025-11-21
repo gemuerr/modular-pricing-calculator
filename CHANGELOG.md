@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.9.5
+- Added email diagnostic functionality to help troubleshoot email sending issues
+- Added error logging for email send attempts (when WP_DEBUG is enabled)
+- Added email status display in admin panel showing last email send attempt and troubleshooting tips
+- Improved error handling in email sending function
+
 ## 0.9.4
 - Fixed the frontend phone number validation pattern so modern browsers no longer throw an invalid regular expression error.
 

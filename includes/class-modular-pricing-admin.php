@@ -292,6 +292,42 @@ class Modular_Pricing_Admin {
                     <li>Save changes</li>
                 </ol>
             </div>
+
+            <?php
+            // Email diagnostic section
+            $last_email_status = get_transient('modular_pricing_last_email_status');
+            if ($last_email_status) {
+                ?>
+                <div style="margin-top: 40px; padding: 20px; background: <?php echo $last_email_status['success'] ? '#d4edda' : '#f8d7da'; ?>; border-left: 4px solid <?php echo $last_email_status['success'] ? '#28a745' : '#dc3545'; ?>;">
+                    <h3>Email Status Diagnostic</h3>
+                    <p><strong>Last Email Attempt:</strong> <?php echo esc_html($last_email_status['timestamp']); ?></p>
+                    <p><strong>Recipient:</strong> <?php echo esc_html($last_email_status['to']); ?></p>
+                    <p><strong>Status:</strong> 
+                        <?php if ($last_email_status['success']): ?>
+                            <span style="color: #155724; font-weight: bold;">✓ Success</span>
+                        <?php else: ?>
+                            <span style="color: #721c24; font-weight: bold;">✗ Failed</span>
+                        <?php endif; ?>
+                    </p>
+                    <?php if (!$last_email_status['success'] && !empty($last_email_status['error'])): ?>
+                        <p><strong>Error:</strong> <code><?php echo esc_html($last_email_status['error']); ?></code></p>
+                    <?php endif; ?>
+                    <?php if (!$last_email_status['success']): ?>
+                        <div style="margin-top: 15px; padding: 15px; background: #fff; border-radius: 4px;">
+                            <h4 style="margin-top: 0;">Troubleshooting Email Issues:</h4>
+                            <ul>
+                                <li><strong>Check WordPress mail configuration:</strong> WordPress may not be configured to send emails. Consider installing an SMTP plugin like "WP Mail SMTP" or "Easy WP SMTP".</li>
+                                <li><strong>Check server mail() function:</strong> Some hosting providers disable PHP's mail() function. Contact your hosting provider or use an SMTP plugin.</li>
+                                <li><strong>Check spam folder:</strong> Emails might be going to spam. Check the recipient's spam/junk folder.</li>
+                                <li><strong>Enable WP_DEBUG:</strong> Add <code>define('WP_DEBUG', true);</code> and <code>define('WP_DEBUG_LOG', true);</code> to your wp-config.php to see detailed error logs in <code>wp-content/debug.log</code>.</li>
+                                <li><strong>Test WordPress mail:</strong> Try sending a test email from WordPress Settings → General (if available) or use a plugin to test email functionality.</li>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php
+            }
+            ?>
         </div>
         <?php
     }
