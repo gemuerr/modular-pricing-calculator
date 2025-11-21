@@ -2,11 +2,21 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.9.8
+- Modernized admin configuration page UI with improved styling, spacing, and visual hierarchy
+- Enhanced form inputs with better focus states and borders
+- Improved pricing table layout and readability
+- Updated help section with cleaner card-based design
+
+## 0.9.7
+- Updated monthly price calculation from 4 weeks to 4.33 weeks for more accurate monthly pricing
+
+## 0.9.6
+- Standardized all button styling for consistency (padding, border-radius, font-size)
+- Updated step navigation button labels to "Weiter" and "Zurück"
+
 ## 0.9.5
-- Added email diagnostic functionality to help troubleshoot email sending issues
-- Added error logging for email send attempts (when WP_DEBUG is enabled)
-- Added email status display in admin panel showing last email send attempt and troubleshooting tips
-- Improved error handling in email sending function
+- Fixed email sending functionality
 
 ## 0.9.4
 - Fixed the frontend phone number validation pattern so modern browsers no longer throw an invalid regular expression error.

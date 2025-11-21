@@ -11,7 +11,7 @@ Variable pricing based on number of days selected (1-5 days/week)
 Two configurable subscription models (names customizable in admin)
 Half-day and full-day options with different pricing
 Weekday selector (Monday-Friday individual selection)
-Monthly price calculation: (price per day × days per week × 4 weeks)
+Monthly price calculation: (price per day × days per week × 4.33 weeks)
 
 User Interface
 

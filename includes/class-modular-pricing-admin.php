@@ -36,7 +36,7 @@ class Modular_Pricing_Admin {
     public function admin_page() {
         $settings = Modular_Pricing_Settings::get_settings();
         ?>
-        <div class="wrap">
+        <div class="wrap modular-pricing-admin">
             <h1>Modular Pricing Configuration</h1>
             <form method="post" action="options.php">
                 <?php settings_fields('modular_pricing_group'); ?>
@@ -264,26 +264,179 @@ class Modular_Pricing_Admin {
                 </table>
 
                 <style>
-                    .pricing-table {
-                        border-collapse: collapse;
+                    .modular-pricing-admin {
+                        max-width: 1200px;
                     }
-                    .pricing-table td {
-                        padding: 5px 10px;
+                    .modular-pricing-admin .form-table {
+                        background: #fff;
+                        border: 1px solid #c3c4c7;
+                        border-radius: 8px;
+                        box-shadow: 0 1px 1px rgba(0,0,0,.04);
+                        margin-top: 20px;
+                    }
+                    .modular-pricing-admin .form-table th[colspan="2"] {
+                        padding: 20px 20px 15px;
+                        border-bottom: 2px solid #f0f0f1;
+                        background: #f6f7f7;
+                    }
+                    .modular-pricing-admin .form-table th[colspan="2"] h2 {
+                        margin: 0;
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #1d2327;
+                    }
+                    .modular-pricing-admin .form-table th[scope="row"] {
+                        padding: 15px 20px;
+                        font-weight: 500;
+                        color: #1d2327;
+                        width: 200px;
+                    }
+                    .modular-pricing-admin .form-table td {
+                        padding: 15px 20px;
+                    }
+                    .modular-pricing-admin .form-table tr:not(:last-child) {
+                        border-bottom: 1px solid #f0f0f1;
+                    }
+                    .modular-pricing-admin input[type="text"],
+                    .modular-pricing-admin input[type="email"],
+                    .modular-pricing-admin input[type="number"] {
+                        padding: 8px 12px;
+                        border: 1px solid #8c8f94;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                    }
+                    .modular-pricing-admin input[type="text"]:focus,
+                    .modular-pricing-admin input[type="email"]:focus,
+                    .modular-pricing-admin input[type="number"]:focus {
+                        border-color: #2271b1;
+                        box-shadow: 0 0 0 1px #2271b1;
+                        outline: 2px solid transparent;
+                    }
+                    .modular-pricing-admin input[type="color"] {
+                        width: 60px;
+                        height: 40px;
+                        border: 1px solid #8c8f94;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        padding: 2px;
+                    }
+                    .modular-pricing-admin .pricing-table {
+                        border-collapse: separate;
+                        border-spacing: 8px;
+                        width: 100%;
+                        max-width: 600px;
+                    }
+                    .modular-pricing-admin .pricing-table td {
+                        padding: 8px 12px;
+                        vertical-align: middle;
+                    }
+                    .modular-pricing-admin .pricing-table td:first-child {
+                        color: #646970;
+                        font-size: 13px;
+                        white-space: nowrap;
+                        padding-right: 8px;
+                    }
+                    .modular-pricing-admin .pricing-table input[type="number"] {
+                        width: 100%;
+                        max-width: 120px;
+                    }
+                    .modular-pricing-admin label {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        margin-bottom: 8px;
+                        cursor: pointer;
+                    }
+                    .modular-pricing-admin input[type="radio"],
+                    .modular-pricing-admin input[type="checkbox"] {
+                        margin: 0;
+                        cursor: pointer;
+                    }
+                    .modular-pricing-admin .description {
+                        color: #646970;
+                        font-size: 13px;
+                        margin-top: 8px;
+                        line-height: 1.5;
+                    }
+                    .modular-pricing-admin .description a {
+                        color: #2271b1;
+                        text-decoration: none;
+                    }
+                    .modular-pricing-admin .description a:hover {
+                        text-decoration: underline;
+                    }
+                    .modular-pricing-admin .help-section {
+                        margin-top: 30px;
+                        padding: 24px;
+                        background: #f6f7f7;
+                        border: 1px solid #c3c4c7;
+                        border-left: 4px solid #2271b1;
+                        border-radius: 4px;
+                    }
+                    .modular-pricing-admin .help-section h3 {
+                        margin-top: 0;
+                        margin-bottom: 16px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #1d2327;
+                    }
+                    .modular-pricing-admin .help-section h4 {
+                        margin-top: 20px;
+                        margin-bottom: 10px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #1d2327;
+                    }
+                    .modular-pricing-admin .help-section code {
+                        background: #fff;
+                        padding: 12px 16px;
+                        display: block;
+                        margin-top: 10px;
+                        border: 1px solid #c3c4c7;
+                        border-radius: 4px;
+                        font-family: 'Courier New', monospace;
+                        font-size: 13px;
+                        color: #1d2327;
+                    }
+                    .modular-pricing-admin .help-section ol {
+                        margin-left: 20px;
+                        line-height: 1.8;
+                    }
+                    .modular-pricing-admin .help-section ol li {
+                        margin-bottom: 8px;
+                    }
+                    .modular-pricing-admin .help-section a {
+                        color: #2271b1;
+                        text-decoration: none;
+                    }
+                    .modular-pricing-admin .help-section a:hover {
+                        text-decoration: underline;
+                    }
+                    .modular-pricing-admin .submit {
+                        margin-top: 20px;
+                    }
+                    .modular-pricing-admin .submit .button-primary {
+                        padding: 10px 20px;
+                        font-size: 14px;
+                        font-weight: 500;
+                        border-radius: 4px;
+                        box-shadow: 0 1px 0 #2271b1;
                     }
                 </style>
 
                 <?php submit_button(); ?>
             </form>
 
-            <div style="margin-top: 40px; padding: 20px; background: #f0f0f1; border-left: 4px solid #2271b1;">
+            <div class="help-section">
                 <h3>How to Use</h3>
                 <p>Add the pricing calculator to any page or post using this shortcode:</p>
-                <code style="background: white; padding: 10px; display: block; margin-top: 10px;">[pricing_calculator]</code>
+                <code>[pricing_calculator]</code>
 
-                <h4 style="margin-top: 20px;">Variable Pricing:</h4>
-                <p>The pricing is variable based on the number of days selected. Configure different prices per day for 1-5 days per week. The final monthly price is calculated as: (price per day × number of days per week × 4 weeks).</p>
+                <h4>Variable Pricing</h4>
+                <p>The pricing is variable based on the number of days selected. Configure different prices per day for 1-5 days per week. The final monthly price is calculated as: (price per day × number of days per week × 4.33 weeks).</p>
 
-                <h4 style="margin-top: 20px;">Setting up reCAPTCHA v2:</h4>
+                <h4>Setting up reCAPTCHA v2</h4>
                 <ol>
                     <li>Go to <a href="https://www.google.com/recaptcha/admin" target="_blank">Google reCAPTCHA Admin Console</a></li>
                     <li>Register a new site with reCAPTCHA v2 (checkbox type)</li>
@@ -292,42 +445,6 @@ class Modular_Pricing_Admin {
                     <li>Save changes</li>
                 </ol>
             </div>
-
-            <?php
-            // Email diagnostic section
-            $last_email_status = get_transient('modular_pricing_last_email_status');
-            if ($last_email_status) {
-                ?>
-                <div style="margin-top: 40px; padding: 20px; background: <?php echo $last_email_status['success'] ? '#d4edda' : '#f8d7da'; ?>; border-left: 4px solid <?php echo $last_email_status['success'] ? '#28a745' : '#dc3545'; ?>;">
-                    <h3>Email Status Diagnostic</h3>
-                    <p><strong>Last Email Attempt:</strong> <?php echo esc_html($last_email_status['timestamp']); ?></p>
-                    <p><strong>Recipient:</strong> <?php echo esc_html($last_email_status['to']); ?></p>
-                    <p><strong>Status:</strong> 
-                        <?php if ($last_email_status['success']): ?>
-                            <span style="color: #155724; font-weight: bold;">✓ Success</span>
-                        <?php else: ?>
-                            <span style="color: #721c24; font-weight: bold;">✗ Failed</span>
-                        <?php endif; ?>
-                    </p>
-                    <?php if (!$last_email_status['success'] && !empty($last_email_status['error'])): ?>
-                        <p><strong>Error:</strong> <code><?php echo esc_html($last_email_status['error']); ?></code></p>
-                    <?php endif; ?>
-                    <?php if (!$last_email_status['success']): ?>
-                        <div style="margin-top: 15px; padding: 15px; background: #fff; border-radius: 4px;">
-                            <h4 style="margin-top: 0;">Troubleshooting Email Issues:</h4>
-                            <ul>
-                                <li><strong>Check WordPress mail configuration:</strong> WordPress may not be configured to send emails. Consider installing an SMTP plugin like "WP Mail SMTP" or "Easy WP SMTP".</li>
-                                <li><strong>Check server mail() function:</strong> Some hosting providers disable PHP's mail() function. Contact your hosting provider or use an SMTP plugin.</li>
-                                <li><strong>Check spam folder:</strong> Emails might be going to spam. Check the recipient's spam/junk folder.</li>
-                                <li><strong>Enable WP_DEBUG:</strong> Add <code>define('WP_DEBUG', true);</code> and <code>define('WP_DEBUG_LOG', true);</code> to your wp-config.php to see detailed error logs in <code>wp-content/debug.log</code>.</li>
-                                <li><strong>Test WordPress mail:</strong> Try sending a test email from WordPress Settings → General (if available) or use a plugin to test email functionality.</li>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                <?php
-            }
-            ?>
         </div>
         <?php
     }
@@ -338,8 +455,30 @@ class Modular_Pricing_Admin {
 
         $configurations = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC LIMIT 100");
         ?>
-        <div class="wrap">
+        <div class="wrap modular-pricing-admin">
             <h1>User Pricing Configurations</h1>
+            <style>
+                .modular-pricing-admin .wp-list-table {
+                    border: 1px solid #c3c4c7;
+                    border-radius: 8px;
+                    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+                    overflow: hidden;
+                }
+                .modular-pricing-admin .wp-list-table thead th {
+                    background: #f6f7f7;
+                    border-bottom: 2px solid #c3c4c7;
+                    font-weight: 600;
+                    color: #1d2327;
+                    padding: 12px 15px;
+                }
+                .modular-pricing-admin .wp-list-table tbody td {
+                    padding: 12px 15px;
+                    vertical-align: middle;
+                }
+                .modular-pricing-admin .wp-list-table tbody tr:hover {
+                    background: #f6f7f7;
+                }
+            </style>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>

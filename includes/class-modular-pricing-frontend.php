@@ -236,14 +236,14 @@ class Modular_Pricing_Frontend {
                             <span id="days-display">0</span>
                         </div>
                         <div class="summary-row">
-                            <span>Monatlicher Preis (ca. 4 Wochen):</span>
+                            <span>Monatlicher Preis (ca. 4,33 Wochen):</span>
                             <span id="calculated-price"><?php echo $settings['currency']; ?>0,00</span>
                         </div>
                     </div>
 
                     <?php if ($is_separate_steps): ?>
                     <div class="step-navigation">
-                        <button type="button" class="step-button primary" id="step-next-btn">Weiter zu Schritt B</button>
+                        <button type="button" class="step-button primary" id="step-next-btn">Weiter</button>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -319,7 +319,7 @@ class Modular_Pricing_Frontend {
 
                     <div class="step-navigation <?php echo $is_separate_steps ? 'has-secondary' : ''; ?>">
                         <?php if ($is_separate_steps): ?>
-                        <button type="button" class="step-button ghost" id="step-prev-btn">Zurück zu Schritt A</button>
+                        <button type="button" class="step-button ghost" id="step-prev-btn">Zurück</button>
                         <?php endif; ?>
                         <button type="submit" class="submit-button">Unverbindlich anfragen</button>
                     </div>
@@ -348,12 +348,12 @@ class Modular_Pricing_Frontend {
 
             .toggle-form-button {
                 width: 100%;
-                padding: 24px 40px;
+                padding: 16px 24px;
                 background: <?php echo $primary_color; ?>;
                 color: white;
                 border: none;
-                border-radius: 20px;
-                font-size: 18px;
+                border-radius: 12px;
+                font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -620,12 +620,12 @@ class Modular_Pricing_Frontend {
             }
             .submit-button {
                 width: 100%;
-                padding: 16px;
+                padding: 16px 24px;
                 background: <?php echo $primary_color; ?>;
                 color: white;
                 border: none;
                 border-radius: 12px;
-                font-size: 17px;
+                font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -667,8 +667,8 @@ class Modular_Pricing_Frontend {
             .step-button {
                 border: none;
                 border-radius: 12px;
-                padding: 14px 24px;
-                font-size: 15px;
+                padding: 16px 24px;
+                font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -717,9 +717,9 @@ class Modular_Pricing_Frontend {
 
             @media (max-width: 768px) {
                 .toggle-form-button {
-                    padding: 20px 30px;
+                    padding: 16px 24px;
                     font-size: 16px;
-                    border-radius: 20px 20px 0 0;
+                    border-radius: 12px 12px 0 0;
                 }
                 .form-wrapper.open {
                     padding: 30px 20px;
@@ -939,7 +939,7 @@ class Modular_Pricing_Frontend {
 
                     const key = 'model_' + model + '_' + duration + '_' + numDays;
                     const pricePerDay = parseFloat(prices[key]) || 0;
-                    const monthlyPrice = pricePerDay * numDays * 4;
+                    const monthlyPrice = pricePerDay * numDays * 4.33;
 
                     const pricePerDayText = prices.currency + pricePerDay.toFixed(2).replace('.', ',');
                     const monthlyPriceText = prices.currency + monthlyPrice.toFixed(2).replace('.', ',');
@@ -1016,7 +1016,7 @@ class Modular_Pricing_Frontend {
                     const numDays = checkedDays.length;
                     const key = 'model_' + model + '_' + duration + '_' + numDays;
                     const pricePerDay = parseFloat(prices[key]) || 0;
-                    const monthlyPrice = pricePerDay * numDays * 4;
+                    const monthlyPrice = pricePerDay * numDays * 4.33;
 
                     const modelName = model === 'a' ? prices.model_a_name : prices.model_b_name;
 
