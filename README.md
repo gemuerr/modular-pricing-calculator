@@ -29,7 +29,7 @@ Insert the block **Modular Pricing Calculator** from the Widgets category to ren
 
 ### Admin Pages
 - `Modular Pricing → Modular Pricing`: plugin settings (pricing, colors, display mode, step mode, notification email, reCAPTCHA keys).
-- `Modular Pricing → User Configurations`: latest submissions stored in the custom table.
+- `Modular Pricing → Submitted Forms`: latest submissions stored in the custom table with status management and bulk delete functionality.
 
 ### Configurable Step Flow
 - In **Modular Pricing → Modular Pricing** you can choose between `Single step` (legacy combined form) and `Two steps`, which breaks the experience into:
@@ -41,5 +41,5 @@ Insert the block **Modular Pricing Calculator** from the Widgets category to ren
 Each valid submission sends a plain-text email containing contact details, care preferences, selected weekdays, monthly price, notes, and timestamp to the configured notification address.
 
 ## Database
-On activation the plugin creates `wp_pricing_configurations` (table name respects the site prefix) with columns for name, contact info, subscription selection, price, notes, and submission timestamp.
+On activation the plugin creates `wp_pricing_configurations` (table name respects the site prefix) with columns for name, contact info, subscription selection, price, notes, status, and submission timestamp. The status field defaults to "Neu" and can be updated to track the progress of each submission.
 

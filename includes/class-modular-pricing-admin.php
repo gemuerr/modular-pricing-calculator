@@ -25,8 +25,8 @@ class Modular_Pricing_Admin {
 
         add_submenu_page(
             'modular-pricing',
-            'User Configurations',
-            'User Configurations',
+            'Submitted Forms',
+            'Submitted Forms',
             'manage_options',
             'pricing-configurations',
             array($this, 'configurations_page')
@@ -506,9 +506,18 @@ class Modular_Pricing_Admin {
         $table_name = $wpdb->prefix . 'pricing_configurations';
 
         $configurations = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC LIMIT 100");
+        
+        $statuses = array(
+            'Neu' => 'Neu',
+            'Kontaktiert' => 'Kontaktiert',
+            'nicht erreicht' => 'nicht erreicht',
+            'Nicht interessiert' => 'Nicht interessiert',
+            'Vertrag geschlossen' => 'Vertrag geschlossen',
+            'Gekündigt' => 'Gekündigt'
+        );
         ?>
         <div class="wrap modular-pricing-admin">
-            <h1>User Pricing Configurations</h1>
+            <h1>Submitted Forms</h1>
             <style>
                 .modular-pricing-admin .wp-list-table {
                     border: 1px solid #c3c4c7;
@@ -530,47 +539,182 @@ class Modular_Pricing_Admin {
                 .modular-pricing-admin .wp-list-table tbody tr:hover {
                     background: #f6f7f7;
                 }
+                .modular-pricing-admin .bulk-actions {
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .modular-pricing-admin .bulk-actions select,
+                .modular-pricing-admin .bulk-actions button {
+                    padding: 6px 12px;
+                    font-size: 13px;
+                }
+                .modular-pricing-admin .status-select {
+                    padding: 4px 8px;
+                    font-size: 13px;
+                    border: 1px solid #8c8f94;
+                    border-radius: 4px;
+                }
+                .modular-pricing-admin .status-select:focus {
+                    border-color: #2271b1;
+                    box-shadow: 0 0 0 1px #2271b1;
+                    outline: 2px solid transparent;
+                }
             </style>
-            <table class="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Dog Name</th>
-                        <th>Subscription Model</th>
-                        <th>Duration</th>
-                        <th>Selected Days</th>
-                        <th>Monthly Price</th>
-                        <th>Notes</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($configurations)): ?>
+            
+            <form id="pricing-configurations-form" method="post">
+                <div class="bulk-actions">
+                    <select name="bulk_action" id="bulk-action-selector">
+                        <option value="">Bulk Actions</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    <button type="button" class="button action" id="do-bulk-action">Apply</button>
+                </div>
+                
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
                         <tr>
-                            <td colspan="11">No configurations yet.</td>
+                            <th class="check-column"><input type="checkbox" id="cb-select-all"></th>
+                            <th>ID</th>
+                            <th>Status</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Dog Name</th>
+                            <th>Subscription Model</th>
+                            <th>Duration</th>
+                            <th>Selected Days</th>
+                            <th>Monthly Price</th>
+                            <th>Notes</th>
+                            <th>Date</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($configurations as $config): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($configurations)): ?>
                             <tr>
-                                <td><?php echo esc_html($config->id); ?></td>
-                                <td><?php echo esc_html($config->customer_name); ?></td>
-                                <td><?php echo esc_html($config->customer_email); ?></td>
-                                <td><?php echo esc_html($config->customer_phone); ?></td>
-                                <td><?php echo esc_html($config->dog_name); ?></td>
-                                <td><?php echo esc_html($config->subscription_model); ?></td>
-                                <td><?php echo esc_html(ucfirst($config->duration)); ?></td>
-                                <td><?php echo esc_html($config->selected_days); ?></td>
-                                <td><?php echo esc_html($config->monthly_price); ?></td>
-                                <td><?php echo esc_html($config->notes); ?></td>
-                                <td><?php echo esc_html($config->created_at); ?></td>
+                                <td colspan="13">No configurations yet.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($configurations as $config): 
+                                $current_status = isset($config->status) && !empty($config->status) ? $config->status : 'Neu';
+                            ?>
+                                <tr data-id="<?php echo esc_attr($config->id); ?>">
+                                    <th scope="row" class="check-column">
+                                        <input type="checkbox" name="config_ids[]" value="<?php echo esc_attr($config->id); ?>" class="config-checkbox">
+                                    </th>
+                                    <td><?php echo esc_html($config->id); ?></td>
+                                    <td>
+                                        <select class="status-select" data-id="<?php echo esc_attr($config->id); ?>">
+                                            <?php foreach ($statuses as $value => $label): ?>
+                                                <option value="<?php echo esc_attr($value); ?>" <?php selected($current_status, $value); ?>>
+                                                    <?php echo esc_html($label); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td><?php echo esc_html($config->customer_name); ?></td>
+                                    <td><?php echo esc_html($config->customer_email); ?></td>
+                                    <td><?php echo esc_html($config->customer_phone); ?></td>
+                                    <td><?php echo esc_html($config->dog_name); ?></td>
+                                    <td><?php echo esc_html($config->subscription_model); ?></td>
+                                    <td><?php echo esc_html(ucfirst($config->duration)); ?></td>
+                                    <td><?php echo esc_html($config->selected_days); ?></td>
+                                    <td><?php echo esc_html($config->monthly_price); ?></td>
+                                    <td><?php echo esc_html($config->notes); ?></td>
+                                    <td><?php echo esc_html($config->created_at); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </form>
+            
+            <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                // Select all checkbox
+                $('#cb-select-all').on('change', function() {
+                    $('.config-checkbox').prop('checked', $(this).prop('checked'));
+                });
+                
+                // Status change handler
+                $('.status-select').on('change', function() {
+                    var $select = $(this);
+                    var configId = $select.data('id');
+                    var newStatus = $select.val();
+                    
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'update_pricing_status',
+                            config_id: configId,
+                            status: newStatus,
+                            nonce: '<?php echo wp_create_nonce('update_pricing_status'); ?>'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Status updated successfully
+                            } else {
+                                alert('Error updating status: ' + (response.data || 'Unknown error'));
+                                // Revert the select
+                                location.reload();
+                            }
+                        },
+                        error: function() {
+                            alert('Error updating status. Please try again.');
+                            location.reload();
+                        }
+                    });
+                });
+                
+                // Bulk action handler
+                $('#do-bulk-action').on('click', function() {
+                    var action = $('#bulk-action-selector').val();
+                    var selectedIds = [];
+                    
+                    $('.config-checkbox:checked').each(function() {
+                        selectedIds.push($(this).val());
+                    });
+                    
+                    if (!action) {
+                        alert('Please select a bulk action.');
+                        return;
+                    }
+                    
+                    if (selectedIds.length === 0) {
+                        alert('Please select at least one item.');
+                        return;
+                    }
+                    
+                    if (action === 'delete') {
+                        if (!confirm('Are you sure you want to delete ' + selectedIds.length + ' item(s)?')) {
+                            return;
+                        }
+                        
+                        $.ajax({
+                            url: ajaxurl,
+                            type: 'POST',
+                            data: {
+                                action: 'bulk_delete_pricing_configs',
+                                config_ids: selectedIds,
+                                nonce: '<?php echo wp_create_nonce('bulk_delete_pricing_configs'); ?>'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Error deleting items: ' + (response.data || 'Unknown error'));
+                                }
+                            },
+                            error: function() {
+                                alert('Error deleting items. Please try again.');
+                            }
+                        });
+                    }
+                });
+            });
+            </script>
         </div>
         <?php
     }

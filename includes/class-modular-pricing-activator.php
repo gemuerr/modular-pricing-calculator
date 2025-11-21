@@ -21,12 +21,19 @@ class Modular_Pricing_Activator {
             selected_days text NOT NULL,
             monthly_price varchar(50) NOT NULL,
             notes text DEFAULT '',
+            status varchar(50) DEFAULT 'Neu',
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+        
+        // Add status column if it doesn't exist (for existing installations)
+        $column_exists = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'status'");
+        if (empty($column_exists)) {
+            $wpdb->query("ALTER TABLE $table_name ADD COLUMN status varchar(50) DEFAULT 'Neu'");
+        }
     }
 }
 

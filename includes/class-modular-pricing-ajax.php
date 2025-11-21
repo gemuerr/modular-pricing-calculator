@@ -8,6 +8,8 @@ class Modular_Pricing_Ajax {
     public function __construct() {
         add_action('wp_ajax_save_pricing_configuration', array($this, 'save_pricing_configuration'));
         add_action('wp_ajax_nopriv_save_pricing_configuration', array($this, 'save_pricing_configuration'));
+        add_action('wp_ajax_update_pricing_status', array($this, 'update_pricing_status'));
+        add_action('wp_ajax_bulk_delete_pricing_configs', array($this, 'bulk_delete_pricing_configs'));
     }
 
     public function save_pricing_configuration() {
@@ -47,6 +49,7 @@ class Modular_Pricing_Ajax {
                 'selected_days' => $selected_days,
                 'monthly_price' => $monthly_price,
                 'notes' => $notes,
+                'status' => 'Neu',
                 'created_at' => current_time('mysql')
             )
         );
@@ -140,6 +143,101 @@ class Modular_Pricing_Ajax {
         );
 
         wp_mail($notification_email, $subject, $message_plain, $headers);
+    }
+
+    public function update_pricing_status() {
+        // Check nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'update_pricing_status')) {
+            wp_send_json_error(array('message' => 'Security check failed.'));
+            return;
+        }
+
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Insufficient permissions.'));
+            return;
+        }
+
+        $config_id = isset($_POST['config_id']) ? intval($_POST['config_id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : '';
+
+        if ($config_id <= 0) {
+            wp_send_json_error(array('message' => 'Invalid configuration ID.'));
+            return;
+        }
+
+        $allowed_statuses = array('Neu', 'Kontaktiert', 'nicht erreicht', 'Nicht interessiert', 'Vertrag geschlossen', 'Gekündigt');
+        if (!in_array($status, $allowed_statuses, true)) {
+            wp_send_json_error(array('message' => 'Invalid status.'));
+            return;
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'pricing_configurations';
+
+        $result = $wpdb->update(
+            $table_name,
+            array('status' => $status),
+            array('id' => $config_id),
+            array('%s'),
+            array('%d')
+        );
+
+        if ($result === false) {
+            wp_send_json_error(array('message' => 'Failed to update status.'));
+            return;
+        }
+
+        wp_send_json_success(array('message' => 'Status updated successfully.'));
+    }
+
+    public function bulk_delete_pricing_configs() {
+        // Check nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'bulk_delete_pricing_configs')) {
+            wp_send_json_error(array('message' => 'Security check failed.'));
+            return;
+        }
+
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Insufficient permissions.'));
+            return;
+        }
+
+        $config_ids = isset($_POST['config_ids']) ? array_map('intval', $_POST['config_ids']) : array();
+
+        if (empty($config_ids)) {
+            wp_send_json_error(array('message' => 'No items selected.'));
+            return;
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'pricing_configurations';
+
+        // Sanitize IDs and create placeholders
+        $config_ids = array_filter($config_ids, function($id) {
+            return $id > 0;
+        });
+
+        if (empty($config_ids)) {
+            wp_send_json_error(array('message' => 'Invalid configuration IDs.'));
+            return;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($config_ids), '%d'));
+        $query = $wpdb->prepare(
+            "DELETE FROM $table_name WHERE id IN ($placeholders)",
+            $config_ids
+        );
+
+        $result = $wpdb->query($query);
+
+        if ($result === false) {
+            wp_send_json_error(array('message' => 'Failed to delete items.'));
+            return;
+        }
+
+        wp_send_json_success(array('message' => sprintf('%d item(s) deleted successfully.', $result)));
     }
 }
 
