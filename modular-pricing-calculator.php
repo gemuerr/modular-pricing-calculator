@@ -9,19 +9,7 @@
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: modular-pricing-calculator
- * 
- * Changelog:
- * 0.1.0 - Initial release with basic pricing configuration
- * 0.2.0 - Added subscription model A and B with half/full day options
- * 0.3.0 - Added number of days selection (1-30)
- * 0.4.0 - Implemented weekday selector (Mon-Fri) and German translations
- * 0.5.0 - Added reCAPTCHA v2 spam protection and email notifications
- * 0.6.0 - Configurable subscription model names and variable pricing (1-5 days/week)
- * 0.7.0 - Added phone number and notes fields, Figtree font, configurable colors
- * 0.8.0 - Fixed monthly calculation (×4 weeks), added accordion toggle for form
- * 0.9.0 - Added inline validation, optional reCAPTCHA, improved emails, Gutenberg block support
- * 0.9.1 - Fixed Gmail email compatibility with proper line breaks and table-based HTML layout
- * 0.9.2 - Simplified email to plain text only, removed all HTML/styling for universal compatibility
+ * Changelog: See CHANGELOG.md
  */
 
 if (!defined('ABSPATH')) {
