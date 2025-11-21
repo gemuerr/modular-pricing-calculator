@@ -292,7 +292,7 @@ class Modular_Pricing_Frontend {
 
                     <div class="pricing-field">
                         <label for="customer-phone">Deine Telefonnummer:</label>
-                        <input type="tel" id="customer-phone" name="customer_phone" pattern="[0-9+\s\-()]*" placeholder="+49 123 456789" />
+                        <input type="tel" id="customer-phone" name="customer_phone" pattern="[-0-9()+ ]*" placeholder="+49 123 456789" />
                         <span class="help-text">Nur Zahlen, +, Leerzeichen, - und Klammern erlaubt</span>
                         <span class="field-error" id="error-customer-phone"></span>
                     </div>
@@ -843,7 +843,7 @@ class Modular_Pricing_Frontend {
                 const phoneInput = document.getElementById('customer-phone');
                 phoneInput.addEventListener('input', function(e) {
                     let value = e.target.value;
-                    value = value.replace(/[^0-9+\s\-()]/g, '');
+                    value = value.replace(/[^0-9()+\s-]/g, '');
                     e.target.value = value;
                 });
 
@@ -978,7 +978,7 @@ class Modular_Pricing_Frontend {
                     }
 
                     const customerPhone = document.getElementById('customer-phone').value.trim();
-                    const phonePattern = /^[0-9+\s\-()]+$/;
+                    const phonePattern = /^[-0-9()+ ]+$/;
                     if (customerPhone && !phonePattern.test(customerPhone)) {
                         showError('customer-phone', 'Bitte gib eine gültige Telefonnummer ein (nur Zahlen, +, -, Leerzeichen und Klammern).');
                         hasErrors = true;

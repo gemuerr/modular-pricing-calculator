@@ -2,6 +2,9 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.9.4
+- Fixed the frontend phone number validation pattern so modern browsers no longer throw an invalid regular expression error.
+
 ## 0.9.3
 - Added backend option to split the calculator into Step A (pricing) and Step B (user data).
 - Updated frontend markup, styles, and scripts to support the new two-step experience with summaries.
