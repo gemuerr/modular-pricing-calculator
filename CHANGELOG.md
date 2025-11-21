@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.12.0
+- Added sortable columns to Submitted Forms table (click column headers to sort)
+- Refactored table to group submissions by customer email
+- Added visual group headers showing customer name, email, phone, and submission count
+- Improved table styling with better visual hierarchy for grouped items
+- Sort indicators (↑ ↓ ⇅) show current sort column and direction
+
 ## 0.11.0
 - Renamed "User Configurations" admin page to "Submitted Forms"
 - Added status management for form submissions with dropdown selector per row

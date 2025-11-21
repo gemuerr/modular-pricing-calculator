@@ -505,7 +505,45 @@ class Modular_Pricing_Admin {
         global $wpdb;
         $table_name = $wpdb->prefix . 'pricing_configurations';
 
-        $configurations = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC LIMIT 100");
+        // Get sort parameters
+        $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'created_at';
+        $order = isset($_GET['order']) && strtoupper($_GET['order']) === 'ASC' ? 'ASC' : 'DESC';
+        
+        // Validate orderby column
+        $allowed_columns = array('id', 'customer_name', 'customer_email', 'customer_phone', 'dog_name', 
+                                 'subscription_model', 'duration', 'monthly_price', 'status', 'created_at');
+        if (!in_array($orderby, $allowed_columns, true)) {
+            $orderby = 'created_at';
+        }
+        
+        // Sanitize orderby and order for SQL
+        $orderby = esc_sql($orderby);
+        $order = esc_sql($order);
+        
+        $configurations = $wpdb->get_results("SELECT * FROM $table_name ORDER BY $orderby $order LIMIT 100");
+        
+        // Group configurations by customer email
+        $grouped_configs = array();
+        foreach ($configurations as $config) {
+            $email = strtolower(trim($config->customer_email));
+            if (!isset($grouped_configs[$email])) {
+                $grouped_configs[$email] = array(
+                    'customer' => $config,
+                    'submissions' => array()
+                );
+            }
+            $grouped_configs[$email]['submissions'][] = $config;
+        }
+        
+        // Sort groups by customer name if sorting by customer-related columns
+        if (in_array($orderby, array('customer_name', 'customer_email'), true)) {
+            uasort($grouped_configs, function($a, $b) use ($orderby, $order) {
+                $val_a = strtolower($a['customer']->$orderby);
+                $val_b = strtolower($b['customer']->$orderby);
+                $result = strcmp($val_a, $val_b);
+                return $order === 'ASC' ? $result : -$result;
+            });
+        }
         
         $statuses = array(
             'Neu' => 'Neu',
@@ -515,6 +553,20 @@ class Modular_Pricing_Admin {
             'Vertrag geschlossen' => 'Vertrag geschlossen',
             'Gekündigt' => 'Gekündigt'
         );
+        
+        // Build sort URL helper
+        $sort_url = function($column) use ($orderby, $order) {
+            $new_order = ($orderby === $column && $order === 'ASC') ? 'DESC' : 'ASC';
+            $url = add_query_arg(array('orderby' => $column, 'order' => $new_order));
+            return esc_url($url);
+        };
+        
+        $sort_icon = function($column) use ($orderby, $order) {
+            if ($orderby !== $column) {
+                return '<span class="sort-indicator" style="opacity: 0.3;">⇅</span>';
+            }
+            return $order === 'ASC' ? '<span class="sort-indicator">↑</span>' : '<span class="sort-indicator">↓</span>';
+        };
         ?>
         <div class="wrap modular-pricing-admin">
             <h1>Submitted Forms</h1>
@@ -561,6 +613,55 @@ class Modular_Pricing_Admin {
                     box-shadow: 0 0 0 1px #2271b1;
                     outline: 2px solid transparent;
                 }
+                .modular-pricing-admin .sortable {
+                    cursor: pointer;
+                    user-select: none;
+                    position: relative;
+                    padding-right: 25px;
+                }
+                .modular-pricing-admin .sortable:hover {
+                    background: #e5e5e5;
+                }
+                .modular-pricing-admin .sort-indicator {
+                    position: absolute;
+                    right: 8px;
+                    font-size: 12px;
+                    color: #2271b1;
+                }
+                .modular-pricing-admin .customer-group-header {
+                    background: #e8f4f8;
+                    border-top: 2px solid #2271b1;
+                    font-weight: 600;
+                }
+                .modular-pricing-admin .customer-group-header td {
+                    padding: 10px 15px;
+                    color: #1d2327;
+                }
+                .modular-pricing-admin .customer-group-header .customer-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+                .modular-pricing-admin .customer-group-header .customer-name {
+                    font-size: 14px;
+                }
+                .modular-pricing-admin .customer-group-header .customer-email {
+                    font-size: 13px;
+                    color: #646970;
+                    font-weight: normal;
+                }
+                .modular-pricing-admin .customer-group-header .submission-count {
+                    font-size: 12px;
+                    color: #646970;
+                    font-weight: normal;
+                    margin-left: auto;
+                }
+                .modular-pricing-admin .grouped-row {
+                    background: #fafafa;
+                }
+                .modular-pricing-admin .grouped-row:not(:last-child) {
+                    border-bottom: 1px solid #e0e0e0;
+                }
             </style>
             
             <form id="pricing-configurations-form" method="post">
@@ -576,54 +677,113 @@ class Modular_Pricing_Admin {
                     <thead>
                         <tr>
                             <th class="check-column"><input type="checkbox" id="cb-select-all"></th>
-                            <th>ID</th>
-                            <th>Status</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Dog Name</th>
-                            <th>Subscription Model</th>
-                            <th>Duration</th>
+                            <th class="sortable" data-column="id">
+                                <a href="<?php echo $sort_url('id'); ?>" style="text-decoration: none; color: inherit;">
+                                    ID <?php echo $sort_icon('id'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="status">
+                                <a href="<?php echo $sort_url('status'); ?>" style="text-decoration: none; color: inherit;">
+                                    Status <?php echo $sort_icon('status'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="customer_name">
+                                <a href="<?php echo $sort_url('customer_name'); ?>" style="text-decoration: none; color: inherit;">
+                                    Name <?php echo $sort_icon('customer_name'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="customer_email">
+                                <a href="<?php echo $sort_url('customer_email'); ?>" style="text-decoration: none; color: inherit;">
+                                    Email <?php echo $sort_icon('customer_email'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="customer_phone">
+                                <a href="<?php echo $sort_url('customer_phone'); ?>" style="text-decoration: none; color: inherit;">
+                                    Phone <?php echo $sort_icon('customer_phone'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="dog_name">
+                                <a href="<?php echo $sort_url('dog_name'); ?>" style="text-decoration: none; color: inherit;">
+                                    Dog Name <?php echo $sort_icon('dog_name'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="subscription_model">
+                                <a href="<?php echo $sort_url('subscription_model'); ?>" style="text-decoration: none; color: inherit;">
+                                    Subscription Model <?php echo $sort_icon('subscription_model'); ?>
+                                </a>
+                            </th>
+                            <th class="sortable" data-column="duration">
+                                <a href="<?php echo $sort_url('duration'); ?>" style="text-decoration: none; color: inherit;">
+                                    Duration <?php echo $sort_icon('duration'); ?>
+                                </a>
+                            </th>
                             <th>Selected Days</th>
-                            <th>Monthly Price</th>
+                            <th class="sortable" data-column="monthly_price">
+                                <a href="<?php echo $sort_url('monthly_price'); ?>" style="text-decoration: none; color: inherit;">
+                                    Monthly Price <?php echo $sort_icon('monthly_price'); ?>
+                                </a>
+                            </th>
                             <th>Notes</th>
-                            <th>Date</th>
+                            <th class="sortable" data-column="created_at">
+                                <a href="<?php echo $sort_url('created_at'); ?>" style="text-decoration: none; color: inherit;">
+                                    Date <?php echo $sort_icon('created_at'); ?>
+                                </a>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($configurations)): ?>
+                        <?php if (empty($grouped_configs)): ?>
                             <tr>
                                 <td colspan="13">No configurations yet.</td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($configurations as $config): 
-                                $current_status = isset($config->status) && !empty($config->status) ? $config->status : 'Neu';
+                            <?php foreach ($grouped_configs as $email => $group): 
+                                $customer = $group['customer'];
+                                $submissions = $group['submissions'];
+                                $submission_count = count($submissions);
                             ?>
-                                <tr data-id="<?php echo esc_attr($config->id); ?>">
-                                    <th scope="row" class="check-column">
-                                        <input type="checkbox" name="config_ids[]" value="<?php echo esc_attr($config->id); ?>" class="config-checkbox">
-                                    </th>
-                                    <td><?php echo esc_html($config->id); ?></td>
-                                    <td>
-                                        <select class="status-select" data-id="<?php echo esc_attr($config->id); ?>">
-                                            <?php foreach ($statuses as $value => $label): ?>
-                                                <option value="<?php echo esc_attr($value); ?>" <?php selected($current_status, $value); ?>>
-                                                    <?php echo esc_html($label); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                <tr class="customer-group-header">
+                                    <td colspan="13">
+                                        <div class="customer-info">
+                                            <span class="customer-name"><?php echo esc_html($customer->customer_name); ?></span>
+                                            <span class="customer-email"><?php echo esc_html($customer->customer_email); ?></span>
+                                            <?php if (!empty($customer->customer_phone)): ?>
+                                                <span class="customer-phone" style="font-size: 13px; color: #646970;"><?php echo esc_html($customer->customer_phone); ?></span>
+                                            <?php endif; ?>
+                                            <span class="submission-count"><?php echo $submission_count; ?> submission<?php echo $submission_count > 1 ? 's' : ''; ?></span>
+                                        </div>
                                     </td>
-                                    <td><?php echo esc_html($config->customer_name); ?></td>
-                                    <td><?php echo esc_html($config->customer_email); ?></td>
-                                    <td><?php echo esc_html($config->customer_phone); ?></td>
-                                    <td><?php echo esc_html($config->dog_name); ?></td>
-                                    <td><?php echo esc_html($config->subscription_model); ?></td>
-                                    <td><?php echo esc_html(ucfirst($config->duration)); ?></td>
-                                    <td><?php echo esc_html($config->selected_days); ?></td>
-                                    <td><?php echo esc_html($config->monthly_price); ?></td>
-                                    <td><?php echo esc_html($config->notes); ?></td>
-                                    <td><?php echo esc_html($config->created_at); ?></td>
                                 </tr>
+                                <?php foreach ($submissions as $index => $config): 
+                                    $current_status = isset($config->status) && !empty($config->status) ? $config->status : 'Neu';
+                                    $row_class = $submission_count > 1 ? 'grouped-row' : '';
+                                ?>
+                                    <tr class="<?php echo $row_class; ?>" data-id="<?php echo esc_attr($config->id); ?>">
+                                        <th scope="row" class="check-column">
+                                            <input type="checkbox" name="config_ids[]" value="<?php echo esc_attr($config->id); ?>" class="config-checkbox">
+                                        </th>
+                                        <td><?php echo esc_html($config->id); ?></td>
+                                        <td>
+                                            <select class="status-select" data-id="<?php echo esc_attr($config->id); ?>">
+                                                <?php foreach ($statuses as $value => $label): ?>
+                                                    <option value="<?php echo esc_attr($value); ?>" <?php selected($current_status, $value); ?>>
+                                                        <?php echo esc_html($label); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </td>
+                                        <td><?php echo esc_html($config->customer_name); ?></td>
+                                        <td><?php echo esc_html($config->customer_email); ?></td>
+                                        <td><?php echo esc_html($config->customer_phone); ?></td>
+                                        <td><?php echo esc_html($config->dog_name); ?></td>
+                                        <td><?php echo esc_html($config->subscription_model); ?></td>
+                                        <td><?php echo esc_html(ucfirst($config->duration)); ?></td>
+                                        <td><?php echo esc_html($config->selected_days); ?></td>
+                                        <td><?php echo esc_html($config->monthly_price); ?></td>
+                                        <td><?php echo esc_html($config->notes); ?></td>
+                                        <td><?php echo esc_html($config->created_at); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
