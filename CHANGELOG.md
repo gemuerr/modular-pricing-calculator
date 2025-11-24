@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.14.0
+- Changed Model B weekday selection from specific weekday checkboxes to a dropdown selector for number of days (1-4)
+- Model A still allows users to select specific weekdays (Mon-Fri)
+- Model B now displays "X Tage pro Woche" instead of specific weekday names
+- Updated UI to toggle between Model A and Model B selectors dynamically
+- Improved user experience with clearer day selection based on subscription model
+
 ## 0.13.0
 - Added "Nur kontaktanfrage senden" link in Step 1 to skip pricing configuration and go directly to contact form
 - Made weekday selection optional when skipping to contact form
@@ -93,4 +100,3 @@ All notable changes to this project are documented here. Version numbers follow 
 
 ## 0.1.0
 - Initial release with basic pricing configuration.
-
