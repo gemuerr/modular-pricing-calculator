@@ -198,7 +198,7 @@ class Modular_Pricing_Frontend {
                         </div>
                     </div>
 
-                    <div class="pricing-field">
+                    <div class="pricing-field" id="weekday-field-model-a">
                         <label>Wochentage auswählen:</label>
                         
                         <!-- Model A: Specific weekday checkboxes -->
@@ -239,6 +239,30 @@ class Modular_Pricing_Frontend {
                         <span class="help-text model-a-help">Wähle die Tage aus, an denen du die Betreuung nutzen möchtest</span>
                         <span class="help-text model-b-help" style="display: none;">Wähle die Anzahl der Tage pro Woche</span>
                         <span class="field-error" id="error-weekdays"></span>
+                    </div>
+
+                    <div class="pricing-field" id="days-field-model-b" style="display: none;">
+                        <label>Anzahl Tage pro Woche:</label>
+                        <div class="radio-selector" id="days-selector">
+                            <label class="radio-option">
+                                <input type="radio" name="num_days" value="1" class="num-days-radio" />
+                                <span class="radio-label">1 Tag</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="num_days" value="2" class="num-days-radio" />
+                                <span class="radio-label">2 Tage</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="num_days" value="3" class="num-days-radio" />
+                                <span class="radio-label">3 Tage</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="num_days" value="4" class="num-days-radio" />
+                                <span class="radio-label">4 Tage</span>
+                            </label>
+                        </div>
+                        <span class="help-text">Wähle aus, wie viele Tage pro Woche du die Betreuung nutzen möchtest</span>
+                        <span class="field-error" id="error-num-days"></span>
                     </div>
 
                     <div class="pricing-summary">
@@ -382,7 +406,7 @@ class Modular_Pricing_Frontend {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -404,7 +428,7 @@ class Modular_Pricing_Frontend {
             }
 
             .toggle-icon {
-                transition: transform 0.3s ease;
+                transition: transform 0.15s ease;
                 display: flex;
                 align-items: center;
             }
@@ -416,7 +440,7 @@ class Modular_Pricing_Frontend {
             .form-wrapper {
                 max-height: 0;
                 overflow: hidden;
-                transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: max-height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                 padding: 0 40px;
             }
 
@@ -501,7 +525,7 @@ class Modular_Pricing_Frontend {
                 border-radius: 12px;
                 font-size: 16px;
                 box-sizing: border-box;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 background: #f8fafb;
                 color: #2c3e50;
             }
@@ -567,7 +591,7 @@ class Modular_Pricing_Frontend {
                 border-radius: 12px;
                 font-weight: 500;
                 color: #2c3e50;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 font-size: 15px;
             }
             .radio-option input[type="radio"]:checked + .radio-label,
@@ -680,9 +704,8 @@ class Modular_Pricing_Frontend {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 box-shadow: 0 4px 12px rgba(<?php echo $primary_rgb; ?>, 0.3);
-                margin-top: 10px;
             }
             .submit-button:hover {
                 background: <?php echo $primary_hover; ?>;
@@ -758,7 +781,7 @@ class Modular_Pricing_Frontend {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
             }
             .step-button.primary {
                 background: <?php echo $primary_color; ?>;
@@ -781,6 +804,10 @@ class Modular_Pricing_Frontend {
                 width: auto;
                 min-width: 220px;
                 flex: 1;
+                height: 52px;
+            }
+            form.two-step-enabled .step-navigation .step-button {
+                height: 52px;
             }
             .skip-to-contact-link {
                 display: inline-block;
@@ -789,7 +816,7 @@ class Modular_Pricing_Frontend {
                 text-decoration: none;
                 font-size: 14px;
                 font-weight: 500;
-                transition: color 0.3s ease;
+                transition: color 0.15s ease;
                 cursor: pointer;
             }
             .skip-to-contact-link:hover {
@@ -898,55 +925,37 @@ class Modular_Pricing_Frontend {
                     });
                 }
 
-                // Function to get the number of selected days (works for both models)
-                function getSelectedDaysCount() {
+                // Show/hide appropriate field based on model selection
+                function updateModelFields() {
                     const selectedModel = document.querySelector('input[name="subscription_model"]:checked').value;
+                    const weekdayField = document.getElementById('weekday-field-model-a');
+                    const daysField = document.getElementById('days-field-model-b');
                     
                     if (selectedModel === 'b') {
-                        return parseInt(modelBDaysSelect.value) || 0;
+                        // Model B: show number of days selector, hide weekday selector
+                        if (weekdayField) weekdayField.style.display = 'none';
+                        if (daysField) daysField.style.display = 'block';
+                        // Uncheck all weekday checkboxes
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.checked = false;
+                        });
                     } else {
-                        return Array.from(checkboxes).filter(cb => cb.checked).length;
+                        // Model A: show weekday selector, hide number of days selector
+                        if (weekdayField) weekdayField.style.display = 'block';
+                        if (daysField) daysField.style.display = 'none';
+                        // Uncheck number of days selection
+                        const numDaysRadios = document.querySelectorAll('.num-days-radio');
+                        numDaysRadios.forEach(function(radio) {
+                            radio.checked = false;
+                        });
                     }
-                }
-
-                // Function to get selected days display text
-                function getSelectedDaysText() {
-                    const selectedModel = document.querySelector('input[name="subscription_model"]:checked').value;
-                    
-                    if (selectedModel === 'b') {
-                        const numDays = parseInt(modelBDaysSelect.value) || 0;
-                        if (numDays === 0) return 'Noch keine Auswahl';
-                        return numDays + (numDays === 1 ? ' Tag pro Woche' : ' Tage pro Woche');
-                    } else {
-                        const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
-                        if (checkedDays.length === 0) return 'Noch keine Auswahl';
-                        const weekdayLabels = checkedDays.map(cb => weekdayNames[cb.value]);
-                        return weekdayLabels.join(', ');
-                    }
-                }
-
-                // Function to toggle between Model A and Model B selectors
-                function toggleModelSelectors() {
-                    const selectedModel = document.querySelector('input[name="subscription_model"]:checked').value;
-                    
-                    if (selectedModel === 'b') {
-                        modelASelector.style.display = 'none';
-                        modelBSelector.style.display = 'block';
-                        modelAHelp.style.display = 'none';
-                        modelBHelp.style.display = 'block';
-                    } else {
-                        modelASelector.style.display = 'flex';
-                        modelBSelector.style.display = 'none';
-                        modelAHelp.style.display = 'block';
-                        modelBHelp.style.display = 'none';
-                    }
+                    calculatePrice();
                 }
 
                 // Listen for model changes
                 document.querySelectorAll('input[name="subscription_model"]').forEach(function(radio) {
                     radio.addEventListener('change', function() {
-                        toggleModelSelectors();
-                        calculatePrice();
+                        updateModelFields();
                     });
                 });
 
@@ -972,8 +981,21 @@ class Modular_Pricing_Frontend {
                     });
                 });
 
-                // Initialize model selectors
-                toggleModelSelectors();
+                // Listen for number of days radio changes (Model B)
+                const numDaysRadios = document.querySelectorAll('.num-days-radio');
+                numDaysRadios.forEach(function(radio) {
+                    radio.addEventListener('change', function() {
+                        // Clear error if present
+                        const errorSpan = document.getElementById('error-num-days');
+                        if (errorSpan) {
+                            errorSpan.classList.remove('show');
+                        }
+                        calculatePrice();
+                    });
+                });
+
+                // Initialize model fields
+                updateModelFields();
 
                 if (isAccordion) {
                     const toggleButton = document.getElementById('toggle-form-btn');
@@ -1102,17 +1124,36 @@ class Modular_Pricing_Frontend {
                 }
 
                 function validateStepA() {
-                    const numDays = getSelectedDaysCount();
-                    if (numDays === 0) {
-                        showError('weekdays', 'Bitte wähle mindestens einen Tag aus.');
-                        if (isTwoStep && pricingStep && userStep) {
-                            pricingStep.classList.add('active');
-                            userStep.classList.remove('active');
-                            if (formWrapper) {
-                                formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const model = document.querySelector('input[name="subscription_model"]:checked').value;
+                    
+                    if (model === 'a') {
+                        // Model A: validate weekdays
+                        const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
+                        if (checkedDays.length === 0) {
+                            showError('weekdays', 'Bitte wähle mindestens einen Wochentag aus.');
+                            if (isTwoStep && pricingStep && userStep) {
+                                pricingStep.classList.add('active');
+                                userStep.classList.remove('active');
+                                if (formWrapper) {
+                                    formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
                             }
+                            return false;
                         }
-                        return false;
+                    } else {
+                        // Model B: validate number of days
+                        const selectedNumDaysRadio = document.querySelector('input[name="num_days"]:checked');
+                        if (!selectedNumDaysRadio) {
+                            showError('num-days', 'Bitte wähle die Anzahl der Tage pro Woche aus.');
+                            if (isTwoStep && pricingStep && userStep) {
+                                pricingStep.classList.add('active');
+                                userStep.classList.remove('active');
+                                if (formWrapper) {
+                                    formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                            }
+                            return false;
+                        }
                     }
                     return true;
                 }
@@ -1120,10 +1161,26 @@ class Modular_Pricing_Frontend {
                 function calculatePrice() {
                     const model = document.querySelector('input[name="subscription_model"]:checked').value;
                     const duration = document.querySelector('input[name="day_duration"]:checked').value;
-                    const numDays = getSelectedDaysCount();
                     const modelName = model === 'a' ? prices.model_a_name : prices.model_b_name;
                     const durationLabel = duration === 'half' ? 'Halbtags' : 'Ganztags';
-                    const selectedDaysText = getSelectedDaysText();
+                    
+                    let numDays = 0;
+                    let daysDisplayText = 'Noch keine Auswahl';
+                    
+                    if (model === 'a') {
+                        // Model A: use weekday checkboxes
+                        const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
+                        numDays = checkedDays.length;
+                        const weekdayLabels = checkedDays.map(cb => weekdayNames[cb.value]);
+                        daysDisplayText = weekdayLabels.length ? weekdayLabels.join(', ') : 'Noch keine Auswahl';
+                    } else {
+                        // Model B: use number of days radio
+                        const selectedNumDaysRadio = document.querySelector('input[name="num_days"]:checked');
+                        if (selectedNumDaysRadio) {
+                            numDays = parseInt(selectedNumDaysRadio.value);
+                            daysDisplayText = numDays + ' Tag' + (numDays > 1 ? 'e' : '') + ' pro Woche';
+                        }
+                    }
 
                     if (recapModel) {
                         recapModel.textContent = modelName;
@@ -1132,7 +1189,7 @@ class Modular_Pricing_Frontend {
                         recapDuration.textContent = durationLabel;
                     }
                     if (recapDays) {
-                        recapDays.textContent = selectedDaysText;
+                        recapDays.textContent = daysDisplayText;
                     }
 
                     if (numDays === 0) {
@@ -1202,10 +1259,34 @@ class Modular_Pricing_Frontend {
                         hasErrors = true;
                     }
 
-                    const numDays = getSelectedDaysCount();
+                    let model = document.querySelector('input[name="subscription_model"]:checked').value;
+                    let checkedDays = [];
+                    let numDays = 0;
+                    
+                    if (model === 'a') {
+                        // Model A: get selected weekdays
+                        checkedDays = Array.from(checkboxes)
+                            .filter(cb => cb.checked)
+                            .map(cb => weekdayNames[cb.value]);
+                        numDays = checkedDays.length;
+                    } else {
+                        // Model B: get number of days
+                        const selectedNumDaysRadio = document.querySelector('input[name="num_days"]:checked');
+                        if (selectedNumDaysRadio) {
+                            numDays = parseInt(selectedNumDaysRadio.value);
+                            checkedDays = [numDays + ' Tag' + (numDays > 1 ? 'e' : '') + ' pro Woche'];
+                        }
+                    }
+
+                    // Only validate if we're in single-step mode or if we came from step 1 normally
+                    // If user skipped to step 2, selection is optional
                     const isSkipped = numDays === 0 && isTwoStep;
                     if (numDays === 0 && !isSkipped) {
-                        showError('weekdays', 'Bitte wähle mindestens einen Tag aus.');
+                        if (model === 'a') {
+                            showError('weekdays', 'Bitte wähle mindestens einen Wochentag aus.');
+                        } else {
+                            showError('num-days', 'Bitte wähle die Anzahl der Tage pro Woche aus.');
+                        }
                         hasErrors = true;
                     }
 
@@ -1226,13 +1307,10 @@ class Modular_Pricing_Frontend {
                         return;
                     }
 
-                    // Prepare form data
-                    let model, duration, modelName, pricePerDay, monthlyPrice;
-                    let selectedDaysForSubmission;
-                    
-                    const selectedModel = document.querySelector('input[name="subscription_model"]:checked').value;
-                    
+                    // Handle skipped pricing step
+                    let duration, modelName, monthlyPrice, pricePerDay;
                     if (numDays === 0 && isTwoStep) {
+                        // User skipped pricing step - use default/empty values
                         model = 'a';
                         duration = 'half';
                         modelName = 'Nicht ausgewählt';
@@ -1242,16 +1320,6 @@ class Modular_Pricing_Frontend {
                     } else {
                         model = selectedModel;
                         duration = document.querySelector('input[name="day_duration"]:checked').value;
-                        
-                        if (selectedModel === 'b') {
-                            selectedDaysForSubmission = numDays + (numDays === 1 ? ' Tag pro Woche' : ' Tage pro Woche');
-                        } else {
-                            const checkedDays = Array.from(checkboxes)
-                                .filter(cb => cb.checked)
-                                .map(cb => weekdayNames[cb.value]);
-                            selectedDaysForSubmission = checkedDays.join(', ');
-                        }
-                        
                         const key = 'model_' + model + '_' + duration + '_' + numDays;
                         pricePerDay = parseFloat(prices[key]) || 0;
                         monthlyPrice = pricePerDay * numDays * weeksMultiplier;
@@ -1271,7 +1339,8 @@ class Modular_Pricing_Frontend {
                     formData.append('dog_name', document.getElementById('dog-name').value);
                     formData.append('subscription_model', modelName);
                     formData.append('duration', duration);
-                    formData.append('selected_days', selectedDaysForSubmission);
+                    formData.append('selected_days', checkedDays.length > 0 ? checkedDays.join(', ') : 'Keine Auswahl');
+                    formData.append('num_days', numDays);
                     formData.append('monthly_price', prices.currency + monthlyPrice.toFixed(2).replace('.', ','));
                     formData.append('notes', document.getElementById('notes').value);
 
