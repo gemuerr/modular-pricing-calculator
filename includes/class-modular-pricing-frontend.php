@@ -200,7 +200,9 @@ class Modular_Pricing_Frontend {
 
                     <div class="pricing-field" id="weekday-field-model-a">
                         <label>Wochentage auswählen:</label>
-                        <div class="weekday-selector" id="weekdays">
+                        
+                        <!-- Model A: Specific weekday checkboxes -->
+                        <div class="weekday-selector model-a-selector" id="weekdays-model-a">
                             <label class="weekday-option">
                                 <input type="checkbox" name="weekdays" value="monday" class="weekday-checkbox" />
                                 <span class="weekday-label">Mo</span>
@@ -222,7 +224,20 @@ class Modular_Pricing_Frontend {
                                 <span class="weekday-label">Fr</span>
                             </label>
                         </div>
-                        <span class="help-text">Wähle die Tage aus, an denen du die Betreuung nutzen möchtest</span>
+                        
+                        <!-- Model B: Number of days selector -->
+                        <div class="model-b-selector" id="weekdays-model-b" style="display: none;">
+                            <select id="model-b-days-select" class="model-b-days-select">
+                                <option value="">Anzahl Tage wählen...</option>
+                                <option value="1">1 Tag pro Woche</option>
+                                <option value="2">2 Tage pro Woche</option>
+                                <option value="3">3 Tage pro Woche</option>
+                                <option value="4">4 Tage pro Woche</option>
+                            </select>
+                        </div>
+                        
+                        <span class="help-text model-a-help">Wähle die Tage aus, an denen du die Betreuung nutzen möchtest</span>
+                        <span class="help-text model-b-help" style="display: none;">Wähle die Anzahl der Tage pro Woche</span>
                         <span class="field-error" id="error-weekdays"></span>
                     </div>
 
@@ -561,10 +576,6 @@ class Modular_Pricing_Frontend {
             .weekday-option {
                 min-width: 60px;
             }
-            .weekday-option input[type="checkbox"]:disabled + .weekday-label {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
             .radio-option input[type="radio"],
             .weekday-option input[type="checkbox"] {
                 display: none;
@@ -594,6 +605,32 @@ class Modular_Pricing_Frontend {
             .weekday-label:hover {
                 border-color: <?php echo $primary_color; ?>;
                 background: #ffffff;
+            }
+            .model-b-selector {
+                width: 100%;
+            }
+            .model-b-days-select {
+                width: 100%;
+                padding: 14px 16px;
+                border: 2px solid #e8eef3;
+                border-radius: 12px;
+                font-size: 16px;
+                box-sizing: border-box;
+                transition: all 0.3s ease;
+                background: #f8fafb;
+                color: #2c3e50;
+                cursor: pointer;
+                font-family: 'Figtree', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-weight: 500;
+            }
+            .model-b-days-select:focus {
+                outline: none;
+                border-color: <?php echo $primary_color; ?>;
+                background: #ffffff;
+                box-shadow: 0 0 0 3px rgba(<?php echo $primary_rgb; ?>, 0.1);
+            }
+            .model-b-days-select option {
+                padding: 10px;
             }
             .help-text {
                 display: block;
@@ -846,6 +883,11 @@ class Modular_Pricing_Frontend {
                 const pricePerDayDisplay = document.getElementById('price-per-day');
                 const daysDisplay = document.getElementById('days-display');
                 const checkboxes = document.querySelectorAll('.weekday-checkbox');
+                const modelASelector = document.getElementById('weekdays-model-a');
+                const modelBSelector = document.getElementById('weekdays-model-b');
+                const modelBDaysSelect = document.getElementById('model-b-days-select');
+                const modelAHelp = document.querySelector('.model-a-help');
+                const modelBHelp = document.querySelector('.model-b-help');
                 const radioButtons = document.querySelectorAll('.radio-input');
                 const submitButton = form.querySelector('.submit-button');
                 const formMessage = document.getElementById('form-message');
@@ -867,12 +909,17 @@ class Modular_Pricing_Frontend {
                 const roundPrices = prices.round_prices == 1;
                 const requireConsent = prices.require_consent_checkbox == 1;
 
+                const weekdayNames = {
+                    'monday': 'Montag',
+                    'tuesday': 'Dienstag',
+                    'wednesday': 'Mittwoch',
+                    'thursday': 'Donnerstag',
+                    'friday': 'Freitag'
+                };
+
                 // Handle consent checkbox and submit button state
                 if (consentCheckbox && requireConsent) {
-                    // Initially disable submit button if consent is required
                     submitButton.disabled = !consentCheckbox.checked;
-
-                    // Update submit button state when checkbox changes
                     consentCheckbox.addEventListener('change', function() {
                         submitButton.disabled = !this.checked;
                     });
@@ -912,10 +959,20 @@ class Modular_Pricing_Frontend {
                     });
                 });
 
-                // Listen for weekday checkbox changes
+                // Listen for Model B dropdown changes
+                if (modelBDaysSelect) {
+                    modelBDaysSelect.addEventListener('change', function() {
+                        const errorSpan = document.getElementById('error-weekdays');
+                        if (errorSpan) {
+                            errorSpan.classList.remove('show');
+                        }
+                        calculatePrice();
+                    });
+                }
+
+                // Listen for Model A checkbox changes
                 checkboxes.forEach(function(checkbox) {
                     checkbox.addEventListener('change', function() {
-                        // Clear weekday error if present
                         const errorSpan = document.getElementById('error-weekdays');
                         if (errorSpan) {
                             errorSpan.classList.remove('show');
@@ -1003,35 +1060,17 @@ class Modular_Pricing_Frontend {
                     if (skipToContactBtn) {
                         skipToContactBtn.addEventListener('click', function(e) {
                             e.preventDefault();
-                            // Set default values if nothing is selected
-                            const checkedDays = Array.from(checkboxes).filter(cb => cb.checked);
-                            if (checkedDays.length === 0) {
-                                // Set default values for recap display
-                                if (recapModel) {
-                                    recapModel.textContent = '-';
-                                }
-                                if (recapDuration) {
-                                    recapDuration.textContent = '-';
-                                }
-                                if (recapDays) {
-                                    recapDays.textContent = 'Keine Auswahl';
-                                }
-                                if (recapPrice) {
-                                    recapPrice.textContent = prices.currency + '0,00';
-                                }
+                            const numDays = getSelectedDaysCount();
+                            if (numDays === 0) {
+                                if (recapModel) recapModel.textContent = '-';
+                                if (recapDuration) recapDuration.textContent = '-';
+                                if (recapDays) recapDays.textContent = 'Keine Auswahl';
+                                if (recapPrice) recapPrice.textContent = prices.currency + '0,00';
                             }
                             showStep('user');
                         });
                     }
                 }
-
-                const weekdayNames = {
-                    'monday': 'Montag',
-                    'tuesday': 'Dienstag',
-                    'wednesday': 'Mittwoch',
-                    'thursday': 'Donnerstag',
-                    'friday': 'Freitag'
-                };
 
                 const phoneInput = document.getElementById('customer-phone');
                 phoneInput.addEventListener('input', function(e) {
@@ -1074,7 +1113,6 @@ class Modular_Pricing_Frontend {
                         }
                     });
                 });
-
 
                 if (consentCheckbox) {
                     consentCheckbox.addEventListener('change', function() {
@@ -1185,7 +1223,6 @@ class Modular_Pricing_Frontend {
                 }
 
                 radioButtons.forEach(rb => rb.addEventListener('change', calculatePrice));
-                // Checkbox change listeners are already added in updateWeekdayAvailability initialization
 
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -1276,12 +1313,12 @@ class Modular_Pricing_Frontend {
                         // User skipped pricing step - use default/empty values
                         model = 'a';
                         duration = 'half';
-                        numDays = 0;
                         modelName = 'Nicht ausgewählt';
                         pricePerDay = 0;
                         monthlyPrice = 0;
+                        selectedDaysForSubmission = 'Keine Auswahl';
                     } else {
-                        model = document.querySelector('input[name="subscription_model"]:checked').value;
+                        model = selectedModel;
                         duration = document.querySelector('input[name="day_duration"]:checked').value;
                         const key = 'model_' + model + '_' + duration + '_' + numDays;
                         pricePerDay = parseFloat(prices[key]) || 0;
@@ -1327,6 +1364,7 @@ class Modular_Pricing_Frontend {
                             if (recaptchaEnabled && typeof grecaptcha !== 'undefined') {
                                 grecaptcha.reset();
                             }
+                            toggleModelSelectors();
                             calculatePrice();
                         } else {
                             formMessage.className = 'error';
@@ -1356,4 +1394,3 @@ class Modular_Pricing_Frontend {
         return ob_get_clean();
     }
 }
-

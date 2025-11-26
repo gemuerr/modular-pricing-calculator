@@ -100,4 +100,3 @@ All notable changes to this project are documented here. Version numbers follow 
 
 ## 0.1.0
 - Initial release with basic pricing configuration.
-
