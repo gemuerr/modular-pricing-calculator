@@ -391,7 +391,7 @@ class Modular_Pricing_Frontend {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -413,7 +413,7 @@ class Modular_Pricing_Frontend {
             }
 
             .toggle-icon {
-                transition: transform 0.3s ease;
+                transition: transform 0.15s ease;
                 display: flex;
                 align-items: center;
             }
@@ -425,7 +425,7 @@ class Modular_Pricing_Frontend {
             .form-wrapper {
                 max-height: 0;
                 overflow: hidden;
-                transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: max-height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                 padding: 0 40px;
             }
 
@@ -510,7 +510,7 @@ class Modular_Pricing_Frontend {
                 border-radius: 12px;
                 font-size: 16px;
                 box-sizing: border-box;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 background: #f8fafb;
                 color: #2c3e50;
             }
@@ -580,7 +580,7 @@ class Modular_Pricing_Frontend {
                 border-radius: 12px;
                 font-weight: 500;
                 color: #2c3e50;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 font-size: 15px;
             }
             .radio-option input[type="radio"]:checked + .radio-label,
@@ -667,9 +667,8 @@ class Modular_Pricing_Frontend {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 box-shadow: 0 4px 12px rgba(<?php echo $primary_rgb; ?>, 0.3);
-                margin-top: 10px;
             }
             .submit-button:hover {
                 background: <?php echo $primary_hover; ?>;
@@ -745,7 +744,7 @@ class Modular_Pricing_Frontend {
                 font-size: 16px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
             }
             .step-button.primary {
                 background: <?php echo $primary_color; ?>;
@@ -780,7 +779,7 @@ class Modular_Pricing_Frontend {
                 text-decoration: none;
                 font-size: 14px;
                 font-weight: 500;
-                transition: color 0.3s ease;
+                transition: color 0.15s ease;
                 cursor: pointer;
             }
             .skip-to-contact-link:hover {
@@ -1223,7 +1222,7 @@ class Modular_Pricing_Frontend {
                         hasErrors = true;
                     }
 
-                    const model = document.querySelector('input[name="subscription_model"]:checked').value;
+                    let model = document.querySelector('input[name="subscription_model"]:checked').value;
                     let checkedDays = [];
                     let numDays = 0;
                     
@@ -1272,7 +1271,7 @@ class Modular_Pricing_Frontend {
                     }
 
                     // Handle skipped pricing step
-                    let model, duration, modelName, monthlyPrice, pricePerDay;
+                    let duration, modelName, monthlyPrice, pricePerDay;
                     if (numDays === 0 && isTwoStep) {
                         // User skipped pricing step - use default/empty values
                         model = 'a';
