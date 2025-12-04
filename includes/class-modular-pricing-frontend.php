@@ -283,7 +283,7 @@ class Modular_Pricing_Frontend {
                     <?php if ($is_separate_steps): ?>
                     <div class="step-navigation">
                         <button type="button" class="step-button primary" id="step-next-btn">Weiter</button>
-                        <a href="#" class="skip-to-contact-link" id="skip-to-contact-btn">Nur kontaktanfrage senden</a>
+                        <a href="#" class="skip-to-contact-link" id="skip-to-contact-btn">Nur Kontaktanfrage senden</a>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -769,7 +769,7 @@ class Modular_Pricing_Frontend {
             }
             form.two-step-enabled .step-pricing .step-navigation {
                 flex-direction: column;
-                align-items: flex-end;
+                align-items: center;
             }
             form.two-step-enabled .step-pricing .step-navigation .step-button {
                 width: 100%;
@@ -1318,7 +1318,7 @@ class Modular_Pricing_Frontend {
                         monthlyPrice = 0;
                         selectedDaysForSubmission = 'Keine Auswahl';
                     } else {
-                        model = selectedModel;
+                        // model is already set from line 1262
                         duration = document.querySelector('input[name="day_duration"]:checked').value;
                         const key = 'model_' + model + '_' + duration + '_' + numDays;
                         pricePerDay = parseFloat(prices[key]) || 0;
@@ -1364,7 +1364,7 @@ class Modular_Pricing_Frontend {
                             if (recaptchaEnabled && typeof grecaptcha !== 'undefined') {
                                 grecaptcha.reset();
                             }
-                            toggleModelSelectors();
+                            updateModelFields();
                             calculatePrice();
                         } else {
                             formMessage.className = 'error';

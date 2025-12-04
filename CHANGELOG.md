@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here. Version numbers follow semantic versioning (MAJOR.MINOR.PATCH).
 
+## 0.15.1
+- Fixed form submission bug: removed undefined `selectedModel` variable reference that prevented final CTA button from working
+- Fixed undefined `toggleModelSelectors()` function call, replaced with correct `updateModelFields()` function
+
 ## 0.15.0
 - Changed Model B selection from weekday checkboxes to number of days selector (1-4 days per week)
 - Model A still uses weekday checkboxes for selecting specific days
